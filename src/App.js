@@ -1,40 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import bitcoinImg from "./bitcoin.png";
 import "./App.css";
 
+const Bitcoins = createContext(0);
+const Bps = createContext(0);
+
 function App() {
-  let [bitcoin, setBitcoin] = useState(0);
-  let [bps, setBps] = useState(0);
+  const [bitcoins, setBitcoins] = useState(0);
+  const [bps, setBps] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBitcoin(bitcoin + bps);
+      setBitcoins(bitcoins + bps);
     }, 1000);
     return () => {
       clearInterval(interval);
-    }
-  }, [bitcoin, bps]);
+    };
+  }, [bitcoins, bps]);
 
-  function onBitcoinClick() {
-    setBitcoin(bitcoin + 1);
-  }
   return (
-    <>
-      <Upgrades bitcoin={bitcoin} setBitcoin={setBitcoin} setBps={setBps} bps={bps} />
-      <MainCounters total={bitcoin} bps={bps} />
-      <Bitcoin onBitcoinClick={onBitcoinClick} />
-    </>
+    <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
+    <Bps.Provider value={{ bps, setBps }}>
+      <Upgrades />
+      <MainCounters total={bitcoins} bps={bps} />
+      <Bitcoin />
+    </Bps.Provider>
+    </Bitcoins.Provider>
   );
 }
 
-function Bitcoin({ onBitcoinClick }) {
+function Bitcoin() {
+  const { bitcoins, setBitcoins } = useContext(Bitcoins);
+  function onClick() {
+    setBitcoins(bitcoins + 1);
+  }
   return (
-    <img
-      class="bitcoin"
-      alt="bitcoin"
-      src={bitcoinImg}
-      onClick={onBitcoinClick}
-    />
+    <img class="bitcoin" alt="bitcoin" src={bitcoinImg} onClick={onClick} />
   );
 }
 
@@ -47,42 +48,26 @@ function MainCounters({ total, bps }) {
   );
 }
 
-function Upgrades({ bitcoin, setBitcoin, setBps, bps }) {
+function Upgrades() {
   return (
     <aside class="upgrades">
       <h3>Upgrades</h3>
-      <Upgrade
-        name="GPU"
-        price="10"
-        priceMultiplier={1.1}
-        bpsPerUpgrade={5}
-        bitcoin={bitcoin}
-        setBitcoin={setBitcoin}
-        setBps={setBps}
-        bps={bps}
-        />
-      <Upgrade
-        name="CPU"
-        price="40"
-        priceMultiplier={1.1}
-        bpsPerUpgrade={20}
-        bitcoin={bitcoin}
-        setBitcoin={setBitcoin}
-        setBps={setBps}
-        bps={bps}
-      />
+      <Upgrade name="GPU" price="10" priceMultiplier={1.1} bpsPerUpgrade={5} />
+      <Upgrade name="CPU" price="40" priceMultiplier={1.1} bpsPerUpgrade={20} />
     </aside>
   );
 }
 
-function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, bitcoin, setBitcoin, bps, setBps }) {
-  let [level, setLevel] = useState(1);
-  let [cost, setCost] = useState(price);
+function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade }) {
+  const { bitcoins, setBitcoins } = useContext(Bitcoins);
+  const { bps, setBps } = useContext(Bps);
+  const [level, setLevel] = useState(1);
+  const [cost, setCost] = useState(price);
   function upgrade() {
-    if (bitcoin < cost) return;
-    setBitcoin(bitcoin - cost);
+    if (bitcoins < cost) return;
+    setBitcoins(bitcoins - cost);
     setLevel(level + 1);
-    setBps(bps + bpsPerUpgrade)
+    setBps(bps + bpsPerUpgrade);
     setCost(price * priceMultiplier * level);
   }
   return (
