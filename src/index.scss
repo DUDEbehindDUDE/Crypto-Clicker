@@ -17,26 +17,42 @@ img.bitcoin {
   height: 100px;
 }
 
-aside.upgrades {
+aside.rig {
   float: right;
   border-radius: 20px;
   margin-right: 20px;
   padding: 15px;
   width: fit-content;
+  max-width: 30%;
   background-color: rosybrown;
   h3 {
     margin-top: 0;
     margin-bottom: 8px;
   }
-  button {
-    border-radius: 10px;
-    border-style: solid;
-    border-color: black;
-    margin-left: 2px;
-    margin-right: 2px;
-    p {
-      margin-top: 2px;
-      margin-bottom: 2px;
+  div.hardware {
+    width: 100%;
+    margin: auto;
+    button {
+      border-radius: 10px;
+      border-style: solid;
+      border-color: black;
+      margin-left: 2px;
+      margin-right: 2px;
+      max-width: 10em;
+      p {
+        margin-top: 2px;
+        margin-bottom: 2px;
+      }
     }
   }
+}
+
+.desc {
+  font-style: italic;
+}
+.canBuy {
+  color: green;
+}
+.cannotBuy {
+  color: red;
 }
