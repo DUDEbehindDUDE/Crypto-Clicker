@@ -10,13 +10,18 @@ function App() {
   const [bps, setBps] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setBitcoins(bitcoins + bps);
-    }, 1000);
+    const bpsInterval = setInterval(handleBps, 100);
     return () => {
-      clearInterval(interval);
+      clearInterval(bpsInterval);
     };
-  }, [bitcoins, bps]);
+  }, [bps]);
+  function handleBps() {
+    setBitcoins((prevState) => prevState + bps/10);
+  }
+
+  function calculateBps() {
+    let baseBps;
+  }
 
   return (
     <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
@@ -32,7 +37,7 @@ function App() {
 function Bitcoin() {
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
   function onClick() {
-    setBitcoins(bitcoins + 1);
+    setBitcoins(a => a + 1);
   }
   return (
     <img class="bitcoin" alt="bitcoin" src={bitcoinImg} onClick={onClick} />
