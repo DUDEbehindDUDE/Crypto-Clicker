@@ -22,8 +22,7 @@ aside.rig {
   border-radius: 20px;
   margin-right: 20px;
   padding: 15px;
-  width: fit-content;
-  max-width: 30%;
+  width: 25em;
   background-color: rosybrown;
   h3 {
     margin-top: 0;
@@ -33,12 +32,12 @@ aside.rig {
     width: 100%;
     margin: auto;
     button {
+      height: 100px;
       border-radius: 10px;
       border-style: solid;
       border-color: black;
-      margin-left: 2px;
-      margin-right: 2px;
-      max-width: 10em;
+      margin-top: 2px;
+      margin-bottom: 2px;
       p {
         margin-top: 2px;
         margin-bottom: 2px;
@@ -55,4 +54,68 @@ aside.rig {
 }
 .cannotBuy {
   color: red;
+}
+
+.tooltip {
+  background-color: blue;
+  div.tooltipDescriptors {
+    width: 50em;
+    span {
+      font-size: xx-small;
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 4px;
+      padding-right: 4px;
+      margin-right: 2px;
+      border-radius: 8px;
+      border-style: solid;
+      border-width: .5px;
+    }
+    span.default {
+      border-color: rgb(238, 94, 238);
+      color: rgb(238, 94, 238);
+      background-color: rgb(63, 43, 63);
+    }
+    span.max {
+      border-color: white;
+      color: white;
+      background-color: rgb(54, 54, 54);
+    }
+    span.incomeModifierPositive {
+      border-color: lightgreen;
+      color: lightgreen;
+      background-color: rgb(30, 54, 30);
+    }
+    span.incomeModifierNegative {
+      border-color: red;
+      color: red;
+      background-color: rgb(61, 25, 25);
+    }
+    span.incomeModifier0 {
+      border-color: white;
+      color: white;
+      background-color: rgb(54, 54, 54);
+    }
+  }
+  div.tooltipMainContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    p.tooltipTitle {
+      width: 45%;
+      font-weight: bold;
+    }
+    aside {
+      width: 100%;
+      p {
+        text-align: justify;
+        font-size: x-small;
+        padding-left: 2em;
+      }
+    }
+    p {
+      margin: 0;
+      padding: 0;
+    }
+  }
 }

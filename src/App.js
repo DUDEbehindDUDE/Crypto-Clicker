@@ -1,4 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 import bitcoinImg from "./bitcoin.png";
 import "./App.css";
 
@@ -130,6 +132,7 @@ function Hardware() {
       desc: "She never learned how to use it, so she's letting you have it for cheap.",
       price: 20,
       maxMoboLevel: 1,
+      bps: 5, // this is only visual; it doesn't affect the actual BPS calculations
     },
   ];
   const ram = [];
@@ -198,34 +201,147 @@ function Hardware() {
         throw `'${item}' is not a valid parameter in setLevel()!`;
     }
   }
+  function generateTooltipObjects(item) {
+    // Generates an array of objects to be rendered by the tooltip
+    const allItems = getAllItems(item);
+    const level = getLevel(item);
+    const ownedDescriptors = [{ text: "Owned", class: "default" }];
+
+    if (allItems[level]?.bps !== undefined) {
+      const bps = allItems[level].bps;
+      const bpsClass = () => {
+        if (bps > 0) return "incomeModifierPositive";
+        else if (bps < 0) return "incomeModifierNegative";
+        else return "incomeModifier0";
+      };
+      ownedDescriptors.push({
+        text: `Bps: ${bps}`,
+        class: bpsClass(),
+      });
+    }
+    if (allItems[level]?.modifier !== undefined) {
+      const modifier = allItems[level].modifier;
+      const modifierClass = () => {
+        if (modifier > 0) return "incomeModifierPositive";
+        else if (modifier < 0) return "incomeModifierNegative";
+        else return "incomeModifier0";
+      };
+      ownedDescriptors.push({
+        text: `${modifier >= 0 ? "+" : ""}${modifier}% bps`,
+        class: modifierClass(),
+      });
+    }
+    if (level >= allItems.length - 1) {
+      ownedDescriptors.push({ text: "Max Upgrades!", class: "max" });
+    }
+    const ownedItemObj =
+      level === -1
+        ? {
+            title: "None!",
+            desc: "There's a whole lot of nothing here.",
+            descriptors: [{ text: "Owned", class: "default" }],
+          }
+        : {
+            title: allItems[level].name,
+            desc: allItems[level].desc,
+            descriptors: ownedDescriptors,
+          };
+
+    const nextDescriptors =
+      allItems[level + 1] !== undefined
+        ? [{ text: "Available", class: "default" }]
+        : null;
+    if (nextDescriptors !== null) {
+      if (allItems[level + 1]?.bps !== undefined) {
+        const bps = allItems[level + 1].bps;
+        const bpsClass = () => {
+          if (bps > 0) return "incomeModifierPositive";
+          else if (bps < 0) return "incomeModifierNegative";
+          else return "incomeModifier0";
+        };
+        nextDescriptors.push({
+          text: `Bps: ${bps}`,
+          class: bpsClass(),
+        });
+      }
+      if (allItems[level + 1]?.modifier !== undefined) {
+        const modifier = allItems[level + 1].modifier;
+        const modifierClass = () => {
+          if (modifier > 0) return "incomeModifierPositive";
+          else if (modifier < 0) return "incomeModifierNegative";
+          else return "incomeModifier0";
+        };
+        nextDescriptors.push({
+          text: `${modifier >= 0 ? "+" : ""}${modifier}% bps`,
+          class: modifierClass(),
+        });
+      }
+
+      nextDescriptors.push({
+        text: `Cost: ${allItems[level + 1].price} btc`,
+        class: bitcoins >= allItems[level + 1].price ? "incomeModifierPositive" : "incomeModifierNegative",
+      });
+    }
+    const nextItemObj =
+      level + 1 > allItems.length - 1
+        ? null
+        : {
+            title: allItems[level + 1].name,
+            desc: allItems[level + 1].desc,
+            descriptors: nextDescriptors,
+          };
+    if (!nextItemObj) {
+      return [ownedItemObj];
+    } else {
+      return [ownedItemObj, nextItemObj];
+    }
+  }
 
   function availableHardware() {
     // Returns everything you can buy
     if (chassisLevel === -1) {
       // if you haven't bought a chassis, it's the only thing available to you
       return (
-        <>
-          <button onClick={() => buy("chassis")}>
-            <p>Chassis</p>
-            {calculateItem("chassis", chassisLevel)}
-          </button>
-        </>
+        <Tooltip
+          element={
+            <button onClick={() => buy("chassis")}>
+              <p>Chassis</p>
+              {calculateItem("chassis", chassisLevel)}
+            </button>
+          }
+          objects={generateTooltipObjects("chassis")}
+        />
       );
     } else {
       return (
         <>
-          <button onClick={() => buy("chassis")}>
-            <p>Chassis</p>
-            {calculateItem("chassis")}
-          </button>
-          <button onClick={() => buy("cpu")}>
-            <p>CPU</p>
-            {calculateItem("cpu")}
-          </button>
-          <button onClick={() => buy("gpu")}>
-            <p>GPU</p>
-            {calculateItem("gpu")}
-          </button>
+          <Tooltip
+            element={
+              <button onClick={() => buy("chassis")}>
+                <p>Chassis</p>
+                {calculateItem("chassis")}
+              </button>
+            }
+            objects={generateTooltipObjects("chassis")}
+          />
+          <Tooltip
+            element={
+              <button onClick={() => buy("cpu")}>
+                <p>CPU</p>
+                {calculateItem("cpu")}
+              </button>
+            }
+            objects={generateTooltipObjects("cpu")}
+          />
+          <Tooltip
+            element={
+              <button onClick={() => buy("gpu")}>
+                <p>GPU</p>
+                {calculateItem("gpu")}
+              </button>
+            }
+            objects={generateTooltipObjects("gpu")}
+          />
         </>
       );
     }
@@ -323,6 +439,63 @@ function Hardware() {
       <h3>Manage your rig</h3>
       {availableHardware()}
     </div>
+  );
+}
+
+function Tooltip({ element, objects }) {
+
+  // Example objects array:
+  // objects = [
+  //   {
+  //     descriptors: [
+  //       { text: "Owned", class: "" },
+  //       { text: "BPS: 5", class: "" },
+  //     ],
+  //     title: "Your Grandma's Old PC",
+  //     desc: "She never learned how to use it, so she's letting you have it for cheap",
+  //   },
+  //   {
+  //     descriptors: [
+  //       { text: "Available", class: "" },
+  //       { text: "BPS: 5 -> 10", class: "" },
+  //       { text: "Price: 1000 btc", class: "cannotBuy" },
+  //     ],
+  //     title: "Corsair RGB mid tower",
+  //     desc: "A mid tower. Has RGB to increase bitcoin yield.",
+  //   },
+  // ];
+
+  const tooltip = objects.map((object, index) => {
+    const descriptors = object.descriptors.map((descriptor) => (
+      <span key={`${descriptor.text}${index}`} class={descriptor.class}>
+        {descriptor.text}
+      </span>
+    ));
+    const title = object.title;
+    const desc = `"${object.desc}"`;
+    const separator =
+      index < objects.length - 1 ? (
+        <span class="separator">———————————————————————–</span>
+      ) : null;
+
+    return (
+      <>
+        <div class="tooltipDescriptors">{descriptors}</div>
+        <div class="tooltipMainContent">
+          <p class="tooltipTitle">{title}</p>
+          <aside class="tooltipDesc">
+            <p class="desc">{desc}</p>
+          </aside>
+        </div>
+        {separator}
+      </>
+    );
+  });
+
+  return (
+    <Tippy className="tooltip" placement="left" content={tooltip}>
+      {element}
+    </Tippy>
   );
 }
 

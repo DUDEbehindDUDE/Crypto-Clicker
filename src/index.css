@@ -19,9 +19,7 @@ aside.rig {
   border-radius: 20px;
   margin-right: 20px;
   padding: 15px;
-  width: -moz-fit-content;
-  width: fit-content;
-  max-width: 30%;
+  width: 25em;
   background-color: rosybrown;
 }
 aside.rig h3 {
@@ -33,12 +31,12 @@ aside.rig div.hardware {
   margin: auto;
 }
 aside.rig div.hardware button {
+  height: 100px;
   border-radius: 10px;
   border-style: solid;
   border-color: black;
-  margin-left: 2px;
-  margin-right: 2px;
-  max-width: 10em;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 aside.rig div.hardware button p {
   margin-top: 2px;
@@ -55,4 +53,68 @@ aside.rig div.hardware button p {
 
 .cannotBuy {
   color: red;
+}
+
+.tooltip {
+  background-color: blue;
+}
+.tooltip div.tooltipDescriptors {
+  width: 50em;
+}
+.tooltip div.tooltipDescriptors span {
+  font-size: xx-small;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-right: 2px;
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 0.5px;
+}
+.tooltip div.tooltipDescriptors span.default {
+  border-color: rgb(238, 94, 238);
+  color: rgb(238, 94, 238);
+  background-color: rgb(63, 43, 63);
+}
+.tooltip div.tooltipDescriptors span.max {
+  border-color: white;
+  color: white;
+  background-color: rgb(54, 54, 54);
+}
+.tooltip div.tooltipDescriptors span.incomeModifierPositive {
+  border-color: lightgreen;
+  color: lightgreen;
+  background-color: rgb(30, 54, 30);
+}
+.tooltip div.tooltipDescriptors span.incomeModifierNegative {
+  border-color: red;
+  color: red;
+  background-color: rgb(61, 25, 25);
+}
+.tooltip div.tooltipDescriptors span.incomeModifier0 {
+  border-color: white;
+  color: white;
+  background-color: rgb(54, 54, 54);
+}
+.tooltip div.tooltipMainContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tooltip div.tooltipMainContent p.tooltipTitle {
+  width: 45%;
+  font-weight: bold;
+}
+.tooltip div.tooltipMainContent aside {
+  width: 100%;
+}
+.tooltip div.tooltipMainContent aside p {
+  text-align: justify;
+  font-size: x-small;
+  padding-left: 2em;
+}
+.tooltip div.tooltipMainContent p {
+  margin: 0;
+  padding: 0;
 }/*# sourceMappingURL=index.css.map */
