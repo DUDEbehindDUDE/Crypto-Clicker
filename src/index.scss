@@ -7,6 +7,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root{
+  display: flex;
+  justify-content: space-between;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
@@ -18,10 +23,9 @@ img.bitcoin {
 }
 
 aside.rig {
-  float: right;
-  border-radius: 20px;
-  margin-right: 20px;
-  padding: 15px;
+  margin: 0;
+  padding: 15px; // Apparently padding is not factored in the height
+  height: calc(100dvh - 30px);  // <---   so you have to fix it here
   width: 25em;
   background-color: rosybrown;
   h3 {
@@ -33,6 +37,7 @@ aside.rig {
     margin: auto;
     button {
       height: 100px;
+      width: 100%;
       border-radius: 10px;
       border-style: solid;
       border-color: black;

@@ -5,7 +5,8 @@ import bitcoinImg from "./bitcoin.png";
 import "./App.css";
 
 const Bitcoins = createContext(0);
-const Bps = createContext(0);
+const Bps = createContext();
+const RigItems = createContext();
 
 // I know this code is an eye-soar, but this is what happens when you have to submit code as a .pdf
 
@@ -16,6 +17,29 @@ const Bps = createContext(0);
 function App() {
   const [bitcoins, setBitcoins] = useState(0);
   const [bps, setBps] = useState(0);
+  const [rigItems, setRigItems] = useState({
+    rig: {
+      cpu: {
+        level: 0,
+        modifier: 0,
+      },
+      gpu: {
+        level: 0,
+        bps: 0,
+      },
+      chassis: {
+        level: -1, // start without one owned
+      },
+      ram: {
+        amount: 2, // Gigabytes
+        modifier: 0,
+      },
+      mobo: {
+        level: 0,
+      },
+    },
+    upgrades: [],
+  });
 
   // Add 1/10th of the bps to total bitcoin every 100ms
   useEffect(() => {
@@ -29,15 +53,43 @@ function App() {
   }
 
   function calculateBps() {
-    let baseBps;
+    if (rigItems.rig.chassis.level === -1) {
+      setBps(0);
+      return;
+    }
+    let baseBps = rigItems.rig.gpu.bps;
+    let bpsModifier = rigItems.rig.cpu.modifier;
+    let ramModifier = rigItems.rig.ram.modifier / 100 + 1;
+    let _bps = baseBps * (bpsModifier / 100 + 1) * ramModifier;
+
+    let upgradeBps = 0;
+    let upgradeModifier = 0;
+    rigItems.upgrades.forEach((upgrade) => {
+      if (upgrade?.modifier !== undefined) {
+        upgradeModifier += upgrade.modifier;
+      }
+      if (upgrade?.bps !== undefined) {
+        upgradeBps += upgrade.bps;
+      }
+    });
+
+    _bps += upgradeBps * (bpsModifier / 100 + 1) * ramModifier;
+    _bps *= upgradeModifier / 100 + 1;
+
+    setBps(_bps);
+    return;
   }
 
   return (
     <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
-      <Bps.Provider value={{ bps, setBps }}>
-        <Rig />
-        <MainCounters total={bitcoins} bps={bps} />
-        <Bitcoin />
+      <Bps.Provider value={{ bps, calculateBps }}>
+        <RigItems.Provider value={{ rigItems, setRigItems }}>
+          <div class="mainContent">
+            <MainCounters total={bitcoins} bps={bps} />
+            <Bitcoin />
+          </div>
+          <Rig />
+        </RigItems.Provider>
       </Bps.Provider>
     </Bitcoins.Provider>
   );
@@ -56,9 +108,17 @@ function Bitcoin() {
 
 function MainCounters({ total, bps }) {
   // Bitcoin and bps counter
+  function calcDisplayBitcoin() {
+    const bitcoins = Math.floor(total);
+    if (bitcoins >= 1000000) {
+      return `${Math.round(bitcoins / 10000) / 100} million`;
+    }
+    return bitcoins;
+  }
+
   return (
     <>
-      <h1 class="totalBitcoin">Bitcoin: {Math.floor(total)}</h1>
+      <h1 class="totalBitcoin">Bitcoin: {calcDisplayBitcoin()}</h1>
       <p class="bitcoinPerSecond">{bps}/s</p>
     </>
   );
@@ -114,8 +174,8 @@ function Hardware() {
       name: "AMD Athlon 3000G",
       desc: "This budget 4-core processor is like that surprisingly good movie you found on Netflix. It might not be a blockbuster, but it'll get the job done and maybe even surprise you.",
       clock: "Base clock: 3.5 GHz, Boost clock: 3.8 GHz",
-      price: 5500,
-      modifier: 5,
+      price: 10,
+      modifier: 50000,
     },
   ];
   const gpus = [
@@ -123,7 +183,7 @@ function Hardware() {
       name: "Intel UHD Graphics",
       desc: "It can't run Crysis. There's no point trying.",
       price: 0,
-      bps: 5,
+      bps: 0.1,
     },
   ];
   const chassis = [
@@ -140,49 +200,56 @@ function Hardware() {
 
   // Variables
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
-  const { bps, setBps } = useContext(Bps);
-  const [chassisLevel, setChassisLevel] = useState(-1); // start without one owned
-  const [cpuLevel, setCpuLevel] = useState(0);
-  const [gpuLevel, setGpuLevel] = useState(0);
-  const [ramLevel, setRamLevel] = useState(0);
-  const [moboLevel, setMoboLevel] = useState(0);
+  const { calculateBps } = useContext(Bps);
+  const { rigItems, setRigItems } = useContext(RigItems);
 
   function getLevel(item) {
+    const _items = rigItems.rig;
     switch (item) {
       case "cpu":
-        return cpuLevel;
+        return _items.cpu.level;
       case "gpu":
-        return gpuLevel;
+        return _items.gpu.level;
       case "chassis":
-        return chassisLevel;
+        return _items.chassis.level;
       case "ram":
-        return ramLevel;
+        return _items.ram.amount;
       case "mobo":
-        return moboLevel;
+        return _items.mobo.amount;
       default:
         throw `'${item} is not a valid parameter in getLevel()!`;
     }
   }
-  function setLevel(item, newValue) {
+  function setLevel(item, newLevel) {
+    let newRigItems = rigItems;
+    let cpuModifier = cpus[getLevel("cpu")].modifier;
+    let gpuModifier = gpus[getLevel("gpu")].bps;
+    let ramModifier = 0; // ram[getLevel("gpu")].modifier;
     switch (item) {
       case "cpu":
-        setCpuLevel(newValue);
+        newRigItems.rig.cpu.level = newLevel;
+        cpuModifier = cpus[newLevel].modifier;
         break;
       case "gpu":
-        setGpuLevel(newValue);
+        newRigItems.rig.gpu.level = newLevel;
+        gpuModifier = gpus[newLevel].modifier;
         break;
       case "chassis":
-        setChassisLevel(newValue);
+        newRigItems.rig.chassis.level = newLevel;
         break;
       case "ram":
-        setRamLevel(newValue);
+        newRigItems.rig.ram.amount = newLevel;
+        ramModifier = ram[newLevel].modifier;
         break;
       case "mobo":
-        setMoboLevel(newValue);
+        newRigItems.rig.mobo.level = newLevel;
         break;
       default:
         throw `'${item}' is not a valid parameter in setLevel()!`;
     }
+    newRigItems.rig.gpu.bps = gpuModifier;
+    newRigItems.rig.cpu.modifier = cpuModifier;
+    setRigItems(newRigItems);
   }
   function getAllItems(item) {
     switch (item) {
@@ -279,7 +346,10 @@ function Hardware() {
 
       nextDescriptors.push({
         text: `Cost: ${allItems[level + 1].price} btc`,
-        class: bitcoins >= allItems[level + 1].price ? "incomeModifierPositive" : "incomeModifierNegative",
+        class:
+          bitcoins >= allItems[level + 1].price
+            ? "incomeModifierPositive"
+            : "incomeModifierNegative",
       });
     }
     const nextItemObj =
@@ -299,14 +369,14 @@ function Hardware() {
 
   function availableHardware() {
     // Returns everything you can buy
-    if (chassisLevel === -1) {
+    if (getLevel("chassis") === -1) {
       // if you haven't bought a chassis, it's the only thing available to you
       return (
         <Tooltip
           element={
             <button onClick={() => buy("chassis")}>
               <p>Chassis</p>
-              {calculateItem("chassis", chassisLevel)}
+              {calculateItem("chassis", getLevel("chassis"))}
             </button>
           }
           objects={generateTooltipObjects("chassis")}
@@ -389,24 +459,19 @@ function Hardware() {
             <p>
               Owned: <span class="owned">{_item.name}</span>
             </p>
-            <p>
-              <span class="desc">{_item.desc}</span>
-            </p>
           </>
         );
       }
     }
 
     function formatNext(allItems) {
+      // returns the next item
       if (level + 1 < allItems.length) {
         const _item = allItems[level + 1];
         const buyClass = _item.price <= bitcoins ? "canBuy" : "cannotBuy";
         return (
           <>
             <p class="nextPurchase">Buy: {_item.name}</p>
-            <p>
-              <span class="desc ">{_item.desc}</span>
-            </p>
             <p class={buyClass}>Cost: {_item.price} btc</p>
           </>
         );
@@ -432,6 +497,7 @@ function Hardware() {
 
     setBitcoins(bitcoins - price);
     setLevel(item, newLevel);
+    calculateBps();
   }
 
   return (
@@ -443,7 +509,6 @@ function Hardware() {
 }
 
 function Tooltip({ element, objects }) {
-
   // Example objects array:
   // objects = [
   //   {
@@ -502,10 +567,12 @@ function Tooltip({ element, objects }) {
 function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
   // Upgrades
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
-  const { bps, setBps } = useContext(Bps);
+  const { calculateBps } = useContext(Bps);
+  const { rigItems, setRigItems } = useContext(RigItems);
   const [level, setLevel] = useState(1);
   const [cost, setCost] = useState(price);
   const [locked, setLocked] = useState(false);
+
   function upgrade() {
     if (bitcoins < cost) return;
     if (level >= maxLevel) {
@@ -514,9 +581,13 @@ function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
     }
     setBitcoins(bitcoins - cost);
     setLevel(level + 1);
-    setBps(bps + bpsPerUpgrade);
     setCost(price * priceMultiplier * level);
     if (level >= maxLevel) setLocked(true);
+
+    let newRigItems = rigItems;
+    newRigItems.upgrades.push({ bps: bpsPerUpgrade });
+    setRigItems(newRigItems);
+    calculateBps();
   }
 
   function determineLocked() {

@@ -5,6 +5,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  display: flex;
+  justify-content: space-between;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
@@ -15,10 +20,9 @@ img.bitcoin {
 }
 
 aside.rig {
-  float: right;
-  border-radius: 20px;
-  margin-right: 20px;
+  margin: 0;
   padding: 15px;
+  height: calc(100dvh - 30px);
   width: 25em;
   background-color: rosybrown;
 }
@@ -32,6 +36,7 @@ aside.rig div.hardware {
 }
 aside.rig div.hardware button {
   height: 100px;
+  width: 100%;
   border-radius: 10px;
   border-style: solid;
   border-color: black;
