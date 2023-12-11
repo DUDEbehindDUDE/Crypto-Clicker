@@ -7,6 +7,7 @@ body {
 
 #root {
   display: flex;
+  width: 100%;
   justify-content: space-between;
 }
 
@@ -14,38 +15,119 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-img.bitcoin {
-  width: 100px;
+@media screen and (max-height: 650px) {
+  div.mainContent img.bitcoin {
+    width: 200px !important;
+    height: 200px !important;
+  }
+}
+div.mainContent {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  height: 100dvh;
+  background-image: url("media/background1.png");
+  background-position: center;
+  background-size: cover;
+}
+div.mainContent .textWrapper {
+  margin-bottom: 10px;
   height: 100px;
+  width: -moz-fit-content;
+  width: fit-content;
+  align-self: center;
+}
+div.mainContent h1 {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+div.mainContent p {
+  width: 100%;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.mainContent img.bitcoin {
+  -o-object-fit: contain;
+     object-fit: contain;
+  margin: 10px auto;
+  padding-bottom: 110px;
+  align-self: center;
+  width: 400px;
+  height: 400px;
 }
 
-aside.rig {
+aside.store {
   margin: 0;
-  padding: 15px;
-  height: calc(100dvh - 30px);
-  width: 25em;
+  padding: 0;
+  height: 100dvh;
+  width: 50%;
   background-color: rosybrown;
+  display: flex;
+  justify-self: right;
+  justify-content: space-between;
 }
-aside.rig h3 {
-  margin-top: 0;
+aside.store h3 {
+  margin-top: 6px;
   margin-bottom: 8px;
+  font-size: x-large;
 }
-aside.rig div.hardware {
-  width: 100%;
-  margin: auto;
-}
-aside.rig div.hardware button {
+aside.store button {
   height: 100px;
   width: 100%;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0px;
   border-style: solid;
   border-color: black;
+  margin-top: 0;
+  padding: 6px;
+  margin-bottom: 4px;
+  background-color: rgb(35, 35, 39);
+  color: white;
+}
+aside.store button div.descriptors {
+  display: flex;
+}
+aside.store button p.buttonTitle {
+  text-align: left;
+  font-weight: bold;
+  font-size: large;
   margin-top: 2px;
   margin-bottom: 2px;
 }
-aside.rig div.hardware button p {
-  margin-top: 2px;
+aside.store button p.buttonType {
+  text-align: left;
+  font-style: italic;
+  font-size: small;
+  margin-top: 0;
   margin-bottom: 2px;
+}
+aside.store button p.manage {
+  text-align: right;
+  font-size: small;
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+aside.store div.systems {
+  padding: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 50%;
+  max-height: 100%;
+  overflow-y: auto;
+  border-right: 2px solid black;
+}
+aside.store div.systemUpgrades {
+  padding: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 50%;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .desc {
@@ -60,13 +142,7 @@ aside.rig div.hardware button p {
   color: red;
 }
 
-.tooltip {
-  background-color: blue;
-}
-.tooltip div.tooltipDescriptors {
-  width: 50em;
-}
-.tooltip div.tooltipDescriptors span {
+span.descriptor {
   font-size: xx-small;
   padding-top: 0;
   padding-bottom: 0;
@@ -77,30 +153,37 @@ aside.rig div.hardware button p {
   border-style: solid;
   border-width: 0.5px;
 }
-.tooltip div.tooltipDescriptors span.default {
+span.descriptor.default {
   border-color: rgb(238, 94, 238);
   color: rgb(238, 94, 238);
   background-color: rgb(63, 43, 63);
 }
-.tooltip div.tooltipDescriptors span.max {
+span.descriptor.max {
   border-color: white;
   color: white;
   background-color: rgb(54, 54, 54);
 }
-.tooltip div.tooltipDescriptors span.incomeModifierPositive {
+span.descriptor.incomeModifierPositive {
   border-color: lightgreen;
   color: lightgreen;
   background-color: rgb(30, 54, 30);
 }
-.tooltip div.tooltipDescriptors span.incomeModifierNegative {
+span.descriptor.incomeModifierNegative {
   border-color: red;
   color: red;
   background-color: rgb(61, 25, 25);
 }
-.tooltip div.tooltipDescriptors span.incomeModifier0 {
+span.descriptor.incomeModifier0 {
   border-color: white;
   color: white;
   background-color: rgb(54, 54, 54);
+}
+
+.tooltip {
+  background-color: blue;
+}
+.tooltip div.tooltipDescriptors {
+  width: 50em;
 }
 .tooltip div.tooltipMainContent {
   display: flex;

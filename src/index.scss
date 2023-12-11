@@ -7,8 +7,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root{
+#root {
   display: flex;
+  width: 100%;
   justify-content: space-between;
 }
 
@@ -17,37 +18,117 @@ code {
     monospace;
 }
 
-img.bitcoin {
-  width: 100px;
-  height: 100px;
+@media screen and (max-height: 650px) {
+  div.mainContent img.bitcoin {
+    width: 200px !important;
+    height: 200px !important;
+  }
 }
 
-aside.rig {
-  margin: 0;
-  padding: 15px; // Apparently padding is not factored in the height
-  height: calc(100dvh - 30px);  // <---   so you have to fix it here
-  width: 25em;
-  background-color: rosybrown;
-  h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
+div.mainContent {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  height: 100dvh;
+  background-image: url("media/background1.png");
+  background-position: center;
+  background-size: cover;
+  .textWrapper {
+    margin-bottom: 10px;
+    height: 100px;
+    width: fit-content;
+    align-self: center;
   }
-  div.hardware {
+  h1 {
     width: 100%;
-    margin: auto;
-    button {
-      height: 100px;
-      width: 100%;
-      border-radius: 10px;
-      border-style: solid;
-      border-color: black;
+    margin: 0;
+    text-align: center;
+  }
+  p {
+    width: 100%;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  img.bitcoin {
+    object-fit: contain;
+    margin: 10px auto;
+    padding-bottom: 110px;
+    align-self: center;
+    width: 400px;
+    height: 400px;
+  }
+}
+
+aside.store {
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  width: 50%;
+  background-color: rosybrown;
+  display: flex;
+  justify-self: right;
+  justify-content: space-between;
+  h3 {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    font-size: x-large;
+  }
+  button {
+    height: 100px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0px;
+    border-style: solid;
+    border-color: black;
+    margin-top: 0;
+    padding: 6px;
+    margin-bottom: 4px;
+    background-color: rgb(35, 35, 39);
+    color: white;
+    div.descriptors {
+      display: flex;
+    }
+    p.buttonTitle {
+      text-align: left;
+      font-weight: bold;
+      font-size: large;
       margin-top: 2px;
       margin-bottom: 2px;
-      p {
-        margin-top: 2px;
-        margin-bottom: 2px;
-      }
     }
+    p.buttonType {
+      text-align: left;
+      font-style: italic;
+      font-size: small;
+      margin-top: 0;
+      margin-bottom: 2px;
+    }
+    p.manage {
+      text-align: right;
+      font-size: small;
+      margin-top: 0;
+      margin-bottom: 2px;
+    }
+  }
+  div.systems {
+    padding: 10px;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 50%;
+    max-height: 100%;
+    overflow-y: auto;
+    border-right: 2px solid black;
+  }
+  div.systemUpgrades {
+    padding: 10px;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 50%;
+    max-height: 100%;
+    overflow-y: auto;
   }
 }
 
@@ -61,46 +142,48 @@ aside.rig {
   color: red;
 }
 
+span.descriptor {
+  font-size: xx-small;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-right: 2px;
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 0.5px;
+
+  &.default {
+    border-color: rgb(238, 94, 238);
+    color: rgb(238, 94, 238);
+    background-color: rgb(63, 43, 63);
+  }
+  &.max {
+    border-color: white;
+    color: white;
+    background-color: rgb(54, 54, 54);
+  }
+  &.incomeModifierPositive {
+    border-color: lightgreen;
+    color: lightgreen;
+    background-color: rgb(30, 54, 30);
+  }
+  &.incomeModifierNegative {
+    border-color: red;
+    color: red;
+    background-color: rgb(61, 25, 25);
+  }
+  &.incomeModifier0 {
+    border-color: white;
+    color: white;
+    background-color: rgb(54, 54, 54);
+  }
+}
+
 .tooltip {
   background-color: blue;
   div.tooltipDescriptors {
     width: 50em;
-    span {
-      font-size: xx-small;
-      padding-top: 0;
-      padding-bottom: 0;
-      padding-left: 4px;
-      padding-right: 4px;
-      margin-right: 2px;
-      border-radius: 8px;
-      border-style: solid;
-      border-width: .5px;
-    }
-    span.default {
-      border-color: rgb(238, 94, 238);
-      color: rgb(238, 94, 238);
-      background-color: rgb(63, 43, 63);
-    }
-    span.max {
-      border-color: white;
-      color: white;
-      background-color: rgb(54, 54, 54);
-    }
-    span.incomeModifierPositive {
-      border-color: lightgreen;
-      color: lightgreen;
-      background-color: rgb(30, 54, 30);
-    }
-    span.incomeModifierNegative {
-      border-color: red;
-      color: red;
-      background-color: rgb(61, 25, 25);
-    }
-    span.incomeModifier0 {
-      border-color: white;
-      color: white;
-      background-color: rgb(54, 54, 54);
-    }
   }
   div.tooltipMainContent {
     display: flex;
