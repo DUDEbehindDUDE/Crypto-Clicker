@@ -84,7 +84,10 @@ function Bitcoin() {
   const { setBitcoins } = useContext(Bitcoins);
   function onClick() {
     setBitcoins((bitcoins) => bitcoins + 1);
-    const clickAudio = new Audio("click.ogg");
+    const randomPlaybackRate = (Math.random() / 10) + .75;
+    const clickAudio = new Audio("click.wav");
+    clickAudio.playbackRate = randomPlaybackRate;
+    clickAudio.preservesPitch = false;
     clickAudio.play();
   }
   return (
