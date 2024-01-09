@@ -8,13 +8,14 @@ const Bitcoins = createContext(0);
 const Bps = createContext();
 const OwnedItems = createContext();
 
-// I know this code is an eye-soar, but this is what happens when you have to submit code as a .pdf
-
-// All sprites contained in this project were generated with the help of Dall-E and/or Midjourney
-
-// Note-- since this is written in ReactJS, all the functions that begin with an uppercase letter
-// (like the one right below this comment) are **react components**, not "procedures". Functions within
-// them (that do not start with an uppercase letter) are "procedures".
+/*
+ * Note - this project was created in ReactJS, so all functions that start with uppercase letters
+ * are react components. To run this code, run react's create-react-app script and populate App.js
+ * with this code.
+ * 
+ * I know this code is an eye-soar, but this is what happens when you have to submit code as a .pdf
+ * All sprites contained in this project were generated with the help of Dall-E and/or Midjourney
+ */
 
 function App() {
   const [bitcoins, setBitcoins] = useState(0);

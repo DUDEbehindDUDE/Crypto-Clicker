@@ -58,12 +58,21 @@ div.mainContent {
     margin-bottom: 0;
   }
   img.bitcoin {
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.6);
     object-fit: contain;
     margin: 10px auto;
     padding-bottom: 110px;
     align-self: center;
     width: 400px;
     height: 400px;
+  }
+  img.bitcoin:hover {
+    width: 450px;
+    height: 450px;
+  }
+  img.bitcoin:active {
+    width: 350px;
+    height: 350px;
   }
 }
 
