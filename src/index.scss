@@ -1,3 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap");
+
+@media screen and (max-height: 650px) {
+  div.mainContent img.bitcoin {
+    width: 200px !important;
+    height: 200px !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -8,6 +17,7 @@ body {
 }
 
 #root {
+  font-family: 'Merriweather', serif;
   display: flex;
   width: 100%;
   justify-content: space-between;
@@ -16,13 +26,6 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
-}
-
-@media screen and (max-height: 650px) {
-  div.mainContent img.bitcoin {
-    width: 200px !important;
-    height: 200px !important;
-  }
 }
 
 div.mainContent {
@@ -42,6 +45,8 @@ div.mainContent {
     align-self: center;
   }
   h1 {
+    font-weight: 900;
+    font-size: 2.2em;
     width: 100%;
     margin: 0;
     text-align: center;
@@ -74,9 +79,11 @@ aside.store {
   h3 {
     margin-top: 6px;
     margin-bottom: 8px;
-    font-size: x-large;
+    font-size: 2em;
+    font-weight: 900;
   }
   button {
+    font-family: 'Merriweather', serif;
     height: 100px;
     width: 100%;
     display: flex;
@@ -94,8 +101,8 @@ aside.store {
     }
     p.buttonTitle {
       text-align: left;
-      font-weight: bold;
-      font-size: large;
+      font-weight: 900;
+      font-size: 1.4em;
       margin-top: 2px;
       margin-bottom: 2px;
     }
@@ -108,9 +115,10 @@ aside.store {
     }
     p.manage {
       text-align: right;
-      font-size: small;
-      margin-top: 0;
-      margin-bottom: 2px;
+      margin-top: auto;
+      font-size: 0.8em;
+      font-style: italic;
+      margin-bottom: 0;
     }
   }
   div.systems {
@@ -143,7 +151,7 @@ aside.store {
 }
 
 span.descriptor {
-  font-size: xx-small;
+  font-size: 0.75em;
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 4px;
@@ -181,9 +189,11 @@ span.descriptor {
 }
 
 .tooltip {
-  background-color: blue;
+  font-family: 'Merriweather', serif;
+  // background-color: ;
   div.tooltipDescriptors {
     width: 50em;
+    margin-bottom: 4px;
   }
   div.tooltipMainContent {
     display: flex;
@@ -192,6 +202,7 @@ span.descriptor {
     p.tooltipTitle {
       width: 45%;
       font-weight: bold;
+      font-size: 1.1em;
     }
     aside {
       width: 100%;
@@ -205,5 +216,11 @@ span.descriptor {
       margin: 0;
       padding: 0;
     }
+  }
+  div.separator {
+    margin: 5px 1px 0;
+    height: 1px;
+    width: 100%;
+    background-color: white;
   }
 }

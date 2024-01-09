@@ -10,6 +10,8 @@ const OwnedItems = createContext();
 
 // I know this code is an eye-soar, but this is what happens when you have to submit code as a .pdf
 
+// All sprites contained in this project were generated with the help of Dall-E and/or Midjourney
+
 // Note-- since this is written in ReactJS, all the functions that begin with an uppercase letter
 // (like the one right below this comment) are **react components**, not "procedures". Functions within
 // them (that do not start with an uppercase letter) are "procedures".
@@ -30,6 +32,7 @@ function App() {
     },
     upgrades: [],
   });
+
   useEffect(() => {
     // Add 1/10th of the bps to total bitcoin every 100ms
     const bpsInterval = setInterval(handleBps, 100);
@@ -50,9 +53,8 @@ function App() {
 
     for (const system in systems) {
       const currentSystem = systems[system];
-      let systemBps =
-        (currentSystem.gpuLevel + 1) ** 2.2 * currentSystem.baseBps;
-      systemBps *= currentSystem.cpuLevel / 5 + 1; // note: need to tune this later
+      let systemBps = (currentSystem.gpuLevel + 1) * currentSystem.baseBps;
+      systemBps *= currentSystem.cpuLevel + 1; // note: need to tune this later
       newBps += systemBps;
       // newCps += systemBps * (Math.log2(currentSystem.ram) - 1) ** 2;
     }
@@ -103,7 +105,7 @@ function MainCounters({ total, bps }) {
     total = Intl.NumberFormat("en", {}).format(total);
   }
 
-  bps = Math.round(bps * 10) / 10
+  bps = Math.round(bps * 10) / 10;
   if (bps >= 1_000_000) {
     bps = Intl.NumberFormat("en", {
       notation: "compact",
@@ -129,33 +131,13 @@ function Store() {
   const [upgradesAvailable, setUpgradesAvailable] = useState(false);
   const [selectedSystem, setSelectedSystem] = useState(null); // string, like "Your Grandma's Old PC"
 
-  // function returnUpgrades() {
-  //   if (!upgradesAvailable) {
-  //     // Check if upgrades can be unlocked, currently unlocks once you hit 1000btc
-  //     if (bitcoins >= 1000) {
-  //       setUpgradesAvailable(true);
-  //     } else {
-  //       return;
-  //     }
-  //   }
-  //   return (
-  //     <div class="upgrades">
-  //       <h3>Upgrades</h3>
-  //       <Upgrade
-  //         name="Wifi Card"
-  //         price={1000}
-  //         priceMultiplier={15}
-  //         bpsPerUpgrade={500}
-  //         maxLevel={5}
-  //       />
-  //     </div>
-  //   );
-  // }
-  function buySystem(name, properties) {
+  function buySystem(price, name, properties) {
     // exampleProperties = {
     //   baseBps: 0.1,
     //   priceModifier: 1,
     // }
+    if (price > bitcoins) return;
+
     let newOwnedItems = ownedItems;
     newOwnedItems.hasChange = true;
     newOwnedItems.systems[name] = properties;
@@ -163,10 +145,12 @@ function Store() {
     newOwnedItems.systems[name].gpuLevel = 0;
     newOwnedItems.systems[name].ram = 2;
     console.log(newOwnedItems);
+    setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
   }
-  function buyUpgrade(item, cost) {
-    if (cost > bitcoins) return;
+  function buyUpgrade(item) {
+    const price = calcItemPrice(item, false, selectedSystem);
+    if (price > bitcoins) return;
     let newOwnedItems = ownedItems;
     newOwnedItems.hasChange = true;
     switch (item) {
@@ -182,8 +166,67 @@ function Store() {
       default:
         throw "Item value " + item + " is not valid";
     }
-    setBitcoins(bitcoins - cost);
+    setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
+  }
+  function calcItemPrice(item, formatted = false, system=selectedSystem) {
+    let level = 1;
+    let priceModifier;
+    switch (item) {
+      case "cpu":
+        priceModifier = 30 * ownedItems.systems[system].priceModifier;
+        level += ownedItems.systems[system].cpuLevel;
+        break;
+      case "gpu":
+        priceModifier = ownedItems.systems[system].priceModifier;
+        level += ownedItems.systems[system].gpuLevel;
+        break;
+      case "ram":
+        priceModifier = ownedItems.systems[system].priceModifier;
+        level += ownedItems.systems[system].ram;
+        break;
+      default:
+        throw `Invalid item ${item}`;
+    }
+    let price = priceModifier ** (1.5 ** (0.1 * level));
+
+    price = Math.round(price * 10) / 10; // minimize use of really fractional numbers
+    if (!formatted) {
+      return price;
+    }
+
+    // Format price so it looks pretty ✨✨
+    if (price >= 1_000_000) {
+      // for numbers bigger than 1 mil, format it like:
+      // 123.456 million (3 decimal places + word)
+      price = Intl.NumberFormat("en", {
+        notation: "compact",
+        compactDisplay: "long",
+        minimumFractionDigits: 3,
+      }).format(price);
+    } else {
+      // For numbers less than 1 mil, we can just format it with
+      // commas (12,345.67). "12.345 thousand" would be really stupid
+      price = Intl.NumberFormat("en", {}).format(price);
+    }
+
+    return price;
+  }
+  function systemHasUpgrades(system) {
+    if (bitcoins >= calcItemPrice("cpu", false, system)) {
+      return true;
+    } else if (bitcoins >= calcItemPrice("gpu", false, system)) {
+      return true;
+    } else if (bitcoins >= calcItemPrice("ram", false, system)) {
+      return true;
+    }
+    return false;
+  }
+  function calcSystemBps(system) {
+    system = ownedItems.systems[system];
+    let systemBps = (system.gpuLevel + 1) * system.baseBps;
+    systemBps *= system.cpuLevel + 1; // note: need to tune this later
+    return systemBps;
   }
 
   return (
@@ -193,17 +236,26 @@ function Store() {
         setSelected={setSelectedSystem}
         buySystem={buySystem}
         ownedItems={ownedItems}
+        calcSystemBps={calcSystemBps}
+        systemHasUpgrades={systemHasUpgrades}
       />
       <SystemUpgrades
         selected={selectedSystem}
         buyItem={buyUpgrade}
         ownedItems={ownedItems}
+        calcItemPrice={calcItemPrice}
       />
     </aside>
   );
 }
 
-function Systems({ setSelected, buySystem, ownedItems }) {
+function Systems({
+  setSelected,
+  buySystem,
+  ownedItems,
+  calcSystemBps,
+  systemHasUpgrades,
+}) {
   // All the data for systems upgrades is stored here
   // Most Systems and descriptions were generated with Bard (https://bard.google.com/)
   const cpus = [
@@ -246,183 +298,88 @@ function Systems({ setSelected, buySystem, ownedItems }) {
       price: 20,
       priceModifier: 20,
       baseBps: 0.5,
-      upgrades: {
-        cpu: cpus,
-        gpu: gpus,
-        ram: { base: 2, max: 2 ** 16 },
-      },
+      // upgrades: {
+      //   cpu: cpus,
+      //   gpu: gpus,
+      //   ram: { base: 2, max: 2 ** 16 },
+      // },
+    },
+    {
+      name: "AliExpress Gaming PC",
+      desc: "The Chinese might be spying on you, but it'll at least mine some coins (if the description is anything to go by)",
+      unlocksAt: 200,
+      special: null,
+      price: 500,
+      priceModifier: 500,
+      baseBps: 10,
     },
     {
       name: "Corsair RGB Mid-Tower",
       desc: "Includes RGB for increased performance",
       unlocksAt: 200,
       special: null,
-      price: 500,
-      priceModifier: 500,
-      baseBps: 10,
-      upgrades: {
-        cpu: cpus,
-        gpu: gpus,
-        ram: { base: 2, max: 2 ** 16 },
-      },
+      price: 5500,
+      priceModifier: 5500,
+      baseBps: 65,
+      // upgrades: {
+      //   cpu: cpus,
+      //   gpu: gpus,
+      //   ram: { base: 2, max: 2 ** 16 },
+      // },
     },
   ];
-
+  
   // Variables
-  const { bitcoins, setBitcoins } = useContext(Bitcoins);
-
-  function onSystemClick(index) {
+  const { bitcoins } = useContext(Bitcoins);
+  
+  const buyClass = (price) =>
+    price > bitcoins ? "incomeModifierNegative" : "incomeModifierPositive";
+  
+  function onSystemClick(index, owned) {
     const system = systems[index];
-    let owned = false;
-    for (const ownedSystem in ownedItems.systems) {
-      // console.log(ownedSystem)
-      if (ownedSystem === system.name) owned = true;
-    }
+
     if (owned) {
       setSelected(system.name);
-      // console.log("owned");
       return;
     }
 
     const price = systems[index].price;
-    if (bitcoins >= price) {
-      setBitcoins(bitcoins - price);
-      buySystem(system.name, {
-        baseBps: system.baseBps,
-        priceModifier: system.priceModifier,
-      });
-      setSelected(system.name);
-    }
+    buySystem(price, system.name, {
+      baseBps: system.baseBps,
+      priceModifier: system.priceModifier,
+    });
+    owned = ownedItems.systems[system.name] !== undefined;
+    if (owned) setSelected(system.name);
   }
-  // function generateTooltipObjects(item) {
-  //   // Generates an array of objects to be rendered by the tooltip
-  //   const allItems = getAllItems(item);
-  //   const level = getLevel(item);
-  //   const ownedDescriptors = [{ text: "Owned", class: "default" }];
 
-  //   if (allItems[level]?.bps !== undefined) {
-  //     const bps = allItems[level].bps;
-  //     const bpsClass = () => {
-  //       if (bps > 0) return "incomeModifierPositive";
-  //       else if (bps < 0) return "incomeModifierNegative";
-  //       else return "incomeModifier0";
-  //     };
-  //     ownedDescriptors.push({
-  //       text: `Bps: ${bps}`,
-  //       class: bpsClass(),
-  //     });
-  //   }
-  //   if (allItems[level]?.modifier !== undefined) {
-  //     const modifier = allItems[level].modifier;
-  //     const modifierClass = () => {
-  //       if (modifier > 0) return "incomeModifierPositive";
-  //       else if (modifier < 0) return "incomeModifierNegative";
-  //       else return "incomeModifier0";
-  //     };
-  //     ownedDescriptors.push({
-  //       text: `${modifier >= 0 ? "+" : ""}${modifier}% bps`,
-  //       class: modifierClass(),
-  //     });
-  //   }
-  //   if (level >= allItems.length - 1) {
-  //     ownedDescriptors.push({ text: "Max Upgrades!", class: "max" });
-  //   }
-  //   const ownedItemObj =
-  //     level === -1
-  //       ? {
-  //           title: "None!",
-  //           desc: "There's a whole lot of nothing here.",
-  //           descriptors: [{ text: "Owned", class: "default" }],
-  //         }
-  //       : {
-  //           title: allItems[level].name,
-  //           desc: allItems[level].desc,
-  //           descriptors: ownedDescriptors,
-  //         };
+  const systemInfoDescriptors = (index, owned) => {
+    // Returns some system-specific descriptors based on the system's index
+    const name = systems[index].name;
+    let descriptors = [];
+    if (!owned) {
+      const bps = systems[index].baseBps;
+      const price = systems[index].price;
+      descriptors.push({ text: "Available", class: "default" });
+      descriptors.push({
+        text: `BPS: ${bps}`,
+        class: "incomeModifierPositive",
+      });
+      descriptors.push({ text: `Cost: ${price} btc`, class: buyClass(price) });
+      return descriptors;
+    }
 
-  //   const nextDescriptors =
-  //     allItems[level + 1] !== undefined
-  //       ? [{ text: "Available", class: "default" }]
-  //       : null;
-  //   if (nextDescriptors !== null) {
-  //     if (allItems[level + 1]?.bps !== undefined) {
-  //       const bps = allItems[level + 1].bps;
-  //       const bpsClass = () => {
-  //         if (bps > 0) return "incomeModifierPositive";
-  //         else if (bps < 0) return "incomeModifierNegative";
-  //         else return "incomeModifier0";
-  //       };
-  //       nextDescriptors.push({
-  //         text: `Bps: ${bps}`,
-  //         class: bpsClass(),
-  //       });
-  //     }
-  //     if (allItems[level + 1]?.modifier !== undefined) {
-  //       const modifier = allItems[level + 1].modifier;
-  //       const modifierClass = () => {
-  //         if (modifier > 0) return "incomeModifierPositive";
-  //         else if (modifier < 0) return "incomeModifierNegative";
-  //         else return "incomeModifier0";
-  //       };
-  //       nextDescriptors.push({
-  //         text: `${modifier >= 0 ? "+" : ""}${modifier}% bps`,
-  //         class: modifierClass(),
-  //       });
-  //     }
-
-  //     nextDescriptors.push({
-  //       text: `Cost: ${allItems[level + 1].price} btc`,
-  //       class:
-  //         bitcoins >= allItems[level + 1].price
-  //           ? "incomeModifierPositive"
-  //           : "incomeModifierNegative",
-  //     });
-  //   }
-  //   const nextItemObj =
-  //     level + 1 > allItems.length - 1
-  //       ? null
-  //       : {
-  //           title: allItems[level + 1].name,
-  //           desc: allItems[level + 1].desc,
-  //           descriptors: nextDescriptors,
-  //         };
-  //   if (!nextItemObj) {
-  //     return [ownedItemObj];
-  //   } else {
-  //     return [ownedItemObj, nextItemObj];
-  //   }
-  // }
-
-  // function buy(item) {
-  //   // Checks if the item can be upgraded, and if so, purchases it
-  //   const level = getLevel(item);
-  //   const newLevel = level + 1;
-  //   const allItems = getAllItems(item);
-  //   if (newLevel >= allItems.length) return;
-
-  //   const price = allItems[newLevel].price;
-  //   if (price > bitcoins) return;
-
-  //   setBitcoins(bitcoins - price);
-  //   setLevel(item, newLevel);
-  // }
+    const bps = calcSystemBps(name);
+    descriptors.push({ text: "Owned", class: "default" });
+    if (systemHasUpgrades(name)) {
+      descriptors.push({ text: "Upgrades Available!", class: "default" });
+    }
+    descriptors.push({ text: `BPS: ${bps}`, class: "incomeModifierPositive" });
+    return descriptors;
+  };
 
   const availableSystems = systems.map((system, index) => {
     const owned = ownedItems.systems[system.name] !== undefined;
-    const ownedDescriptor = owned ? "Owned" : "Available";
-    const bps = system.baseBps;
-    const descriptors = [
-      { text: ownedDescriptor, class: "default" },
-      { text: `Base BPS: ${bps}`, class: "incomeModifierPositive" },
-    ];
-
-    if (!owned) {
-      const price = systems[index].price;
-      const priceClass =
-        bitcoins >= price ? "incomeModifierPositive" : "incomeModifierNegative";
-      descriptors.push({ text: `Cost: ${price}`, class: priceClass });
-    }
-
+    const descriptors = systemInfoDescriptors(index, owned);
     const tooltip = [
       {
         descriptors: descriptors,
@@ -430,9 +387,10 @@ function Systems({ setSelected, buySystem, ownedItems }) {
         desc: system.desc,
       },
     ];
+
     const button = (
       <ItemButton
-        onClick={() => onSystemClick(index)}
+        onClick={() => onSystemClick(index, owned)}
         owned={owned}
         object={{
           descriptors: descriptors,
@@ -452,23 +410,16 @@ function Systems({ setSelected, buySystem, ownedItems }) {
   );
 }
 
-function SystemUpgrades({ selected, buyItem }) {
+function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
   const { bitcoins } = useContext(Bitcoins);
   // Price curve: priceModifier * x^(1.5^0.1x)
   // priceModifier * Math.pow(x, Math.pow(1.5, 0.1x))
 
   const priceClass = (item) =>
-    bitcoins >= getCost(item)
+    bitcoins >= calcItemPrice(item)
       ? "incomeModifierPositive"
       : "incomeModifierNegative";
-
-  function getCost(item) {
-    const level = getLevel(item) + 1;
-    const priceModifier = ownedItems.systems[selected].priceModifier;
-    console.log(priceModifier + " " + ownedItems.systems[selected].priceModifier);
-    return priceModifier * level ** (1.5 ** (0.1 * level));
-  }
 
   function getLevel(item) {
     let level;
@@ -488,29 +439,25 @@ function SystemUpgrades({ selected, buyItem }) {
     return level;
   }
 
-  const exampleOwnedItems = {
-    systems: {
-      example: {
-        baseBps: 0.1,
-        priceModifier: 1,
-        cpuLevel: 0,
-        gpuLevel: 0,
-        ram: 2,
-      },
-    },
-    upgrades: [],
-  };
-
-  // const cpuButtonObject = () => {
-  //   descriptors:
-  // }
+  // const exampleOwnedItems = {
+  //   systems: {
+  //     example: {
+  //       baseBps: 0.1,
+  //       priceModifier: 1,
+  //       cpuLevel: 0,
+  //       gpuLevel: 0,
+  //       ram: 2,
+  //     },
+  //   },
+  //   upgrades: [],
+  // };
 
   const buttonDescriptors = (item) => {
     const priceModifier = ownedItems.systems[selected].priceModifier;
 
     return [
       { text: `Level: ${getLevel(item)}`, class: "default" },
-      { text: `Cost: ${getCost(item)}`, class: priceClass(item) },
+      { text: `Cost: ${calcItemPrice(item, true)} btc`, class: priceClass(item) },
     ];
   };
 
@@ -522,14 +469,13 @@ function SystemUpgrades({ selected, buyItem }) {
       </div>
     );
   }
-
   return (
     <div class="systemUpgrades">
       <h3>Upgrades for {selected}</h3>
       <Tooltip
         element={
           <ItemButton
-            onClick={() => buyItem("gpu", getCost("gpu"))}
+            onClick={() => buyItem("gpu")}
             object={{
               descriptors: buttonDescriptors("gpu"),
               title: `Level ${getLevel("gpu")}`,
@@ -550,7 +496,10 @@ function SystemUpgrades({ selected, buyItem }) {
             descriptors: [
               { text: "Available", class: "default" },
               { text: "BPS: ", class: "incomeModifierPositive" },
-              { text: `Cost: ${getCost("gpu")} btc`, class: priceClass("gpu") },
+              {
+                text: `Cost: ${calcItemPrice("gpu", true)} btc`,
+                class: priceClass("gpu"),
+              },
             ],
             title: `Level ${getLevel("gpu") + 1}`,
             desc: "",
@@ -560,7 +509,7 @@ function SystemUpgrades({ selected, buyItem }) {
       <Tooltip
         element={
           <ItemButton
-            onClick={() => buyItem("cpu", getCost("cpu"))}
+            onClick={() => buyItem("cpu")}
             object={{
               descriptors: buttonDescriptors("cpu"),
               title: `Level ${getLevel("cpu")}`,
@@ -581,7 +530,10 @@ function SystemUpgrades({ selected, buyItem }) {
             descriptors: [
               { text: "Available", class: "default" },
               { text: "BPS: ", class: "incomeModifierPositive" },
-              { text: `Cost: ${getCost("cpu")} btc`, class: priceClass("cpu") },
+              {
+                text: `Cost: ${calcItemPrice("cpu", true)} btc`,
+                class: priceClass("cpu"),
+              },
             ],
             title: `Level ${getLevel("cpu") + 1}`,
             desc: "",
@@ -591,7 +543,7 @@ function SystemUpgrades({ selected, buyItem }) {
       <Tooltip
         element={
           <ItemButton
-            onClick={() => buyItem("ram", getCost("ram"))}
+            onClick={() => buyItem("ram")}
             object={{
               descriptors: buttonDescriptors("ram"),
               title: `Level ${getLevel("ram")}`,
@@ -612,7 +564,10 @@ function SystemUpgrades({ selected, buyItem }) {
             descriptors: [
               { text: "Available", class: "default" },
               { text: "BPS: ", class: "incomeModifierPositive" },
-              { text: `Cost: ${getCost("ram")} btc`, class: priceClass("ram") },
+              {
+                text: `Cost: ${calcItemPrice("ram", true)} btc`,
+                class: priceClass("ram"),
+              },
             ],
             title: `${getLevel("ram") ** 2}GB`,
             desc: "",
@@ -648,7 +603,10 @@ function ItemButton({
     if (owned === undefined) {
       return;
     }
-    return owned ? "Click to manage system >" : "Click to purchase system";
+    const upgradesAvailableText = owned && false ? "Upgrades Available · " : "";
+    return owned
+      ? `${upgradesAvailableText}Click to manage system >`
+      : "Click to purchase system";
   };
   return (
     <button onClick={onClick}>
@@ -694,9 +652,7 @@ function Tooltip({ element, objects }) {
     const title = object.title;
     const desc = `"${object.desc}"`;
     const separator =
-      index < objects.length - 1 ? (
-        <span class="separator">———————————————————————</span>
-      ) : null;
+      index < objects.length - 1 ? <div class="separator" /> : null;
     return (
       <>
         <div class="tooltipDescriptors">{descriptors}</div>
@@ -749,7 +705,7 @@ function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
       return (
         <>
           <p>Level: {level}</p>
-          <p>Cost: {cost}</p>
+          <p>Cost: {cost} btc</p>
         </>
       );
     }
