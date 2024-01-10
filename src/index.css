@@ -1,8 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap");
-@media screen and (max-height: 650px) {
-  div.mainContent img.bitcoin {
+@media screen and (max-height: 700px) {
+  div.mainContent .bitcoin {
     width: 200px !important;
     height: 200px !important;
+  }
+  div.mainContent .bitcoin:hover {
+    width: 250px !important;
+    height: 250px !important;
+  }
+  div.mainContent .bitcoin:active {
+    width: 150px !important;
+    height: 150px !important;
   }
 }
 body {
@@ -25,9 +33,7 @@ code {
 
 div.mainContent {
   align-self: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  position: relative;
   width: 50%;
   height: 100dvh;
   background-image: url("media/background1.png");
@@ -35,11 +41,12 @@ div.mainContent {
   background-size: cover;
 }
 div.mainContent .textWrapper {
-  margin-bottom: 10px;
   height: 100px;
-  width: -moz-fit-content;
-  width: fit-content;
-  align-self: center;
+  width: 100%;
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 div.mainContent h1 {
   font-weight: 900;
@@ -54,21 +61,20 @@ div.mainContent p {
   margin-top: 0;
   margin-bottom: 0;
 }
-div.mainContent img.bitcoin {
+div.mainContent .bitcoin {
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.6);
-  -o-object-fit: contain;
-     object-fit: contain;
-  margin: 10px auto;
-  padding-bottom: 110px;
-  align-self: center;
   width: 400px;
   height: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
-div.mainContent img.bitcoin:hover {
+div.mainContent .bitcoin:hover {
   width: 450px;
   height: 450px;
 }
-div.mainContent img.bitcoin:active {
+div.mainContent .bitcoin:active {
   width: 350px;
   height: 350px;
 }
