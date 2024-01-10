@@ -589,7 +589,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           title: ownedItems.systems[selected].items.cpu.name,
           desc: ownedItems.systems[selected].items.cpu.desc,
         }}
-        additionalContent={["test1"]}
+        // additionalContent={[""]}
       />
       <TooltipItem
         element={
@@ -610,7 +610,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           title: getLevel("ram") + " GB",
           desc: "",
         }}
-        additionalContent={["test"]}
+        // additionalContent={[""]}
       />
     </div>
   );
