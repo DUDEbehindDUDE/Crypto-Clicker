@@ -87,7 +87,7 @@ aside.store {
   padding: 0;
   height: 100dvh;
   width: 50%;
-  background-color: #342135;
+  background-color: rgb(52, 33, 53);
   color: white;
   display: flex;
   justify-self: right;

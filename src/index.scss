@@ -1,8 +1,6 @@
-$vanilla: rgb(251, 249, 169);
-$rust: rgb(172, 61, 25);
-$skyMagenta: rgb(180, 123, 159);
-$finn: rgb(107, 60, 106);
-$darkPurple: rgb(62, 36, 66);
+$accent: rgb(251, 249, 169);
+$background: rgb(52, 33, 53);
+$tooltipBackground: rgb(62, 36, 66);
 
 @import url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap");
 
@@ -94,13 +92,12 @@ div.mainContent {
 }
 
 aside.store {
-  $test: #342135;
   margin: 0;
   padding: 0;
   height: 100dvh;
   width: 50%;
-  background-color: $test;
-  color: white;//$skyMagenta;
+  background-color: $background;
+  color: white;
   display: flex;
   justify-self: right;
   justify-content: space-between;
@@ -118,11 +115,11 @@ aside.store {
     display: flex;
     flex-direction: column;
     border-radius: 15px;
-    border: 1px solid rgba($vanilla,.2);
+    border: 1px solid rgba($accent,.2);
     margin-top: 0;
     padding: 10px;
     margin-bottom: 8px;
-    background-color: rgba($vanilla,.08);//rgb(35, 35, 39);
+    background-color: rgba($accent,.08);
     color: white;
     div.descriptors {
       display: flex;
@@ -150,8 +147,8 @@ aside.store {
     }
   }
   button:hover {
-    background-color: rgba($vanilla,.2);
-    border-color: rgba($vanilla,0);
+    background-color: rgba($accent,.2);
+    border-color: rgba($accent,0);
   }
   div.systems {
     padding: 10px;
@@ -160,8 +157,8 @@ aside.store {
     width: 50%;
     max-height: 100%;
     overflow-y: auto;
-    border-left: 1px solid rgba($vanilla, 0.3);
-    border-right: 1px solid rgba($vanilla, 0.3);
+    border-left: 1px solid rgba($accent, 0.3);
+    border-right: 1px solid rgba($accent, 0.3);
   }
   div.systemUpgrades {
     padding: 10px;
@@ -225,7 +222,7 @@ span.descriptor {
   pointer-events: none;
   font-family: 'Merriweather', serif !important;
   border-radius: 10px !important;
-  background-color: $darkPurple !important;
+  background-color: $tooltipBackground !important;
   div.tooltipDescriptors {
     width: 50em;
     margin-bottom: 4px;
