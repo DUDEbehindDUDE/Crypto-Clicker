@@ -9,8 +9,8 @@
     height: 250px !important;
   }
   div.mainContent .bitcoin:active {
-    width: 150px !important;
-    height: 150px !important;
+    width: 190px !important;
+    height: 190px !important;
   }
 }
 body {
@@ -32,6 +32,9 @@ code {
 }
 
 div.mainContent {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   align-self: center;
   position: relative;
   width: 50%;
@@ -75,8 +78,8 @@ div.mainContent .bitcoin:hover {
   height: 450px;
 }
 div.mainContent .bitcoin:active {
-  width: 350px;
-  height: 350px;
+  width: 390px;
+  height: 390px;
 }
 
 aside.store {
@@ -84,7 +87,8 @@ aside.store {
   padding: 0;
   height: 100dvh;
   width: 50%;
-  background-color: rosybrown;
+  background-color: #342135;
+  color: white;
   display: flex;
   justify-self: right;
   justify-content: space-between;
@@ -97,17 +101,17 @@ aside.store h3 {
 }
 aside.store button {
   font-family: "Merriweather", serif;
+  transition: all ease 0.5s;
   height: 100px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 0px;
-  border-style: solid;
-  border-color: black;
+  border-radius: 15px;
+  border: 1px solid rgba(251, 249, 169, 0.2);
   margin-top: 0;
-  padding: 6px;
-  margin-bottom: 4px;
-  background-color: rgb(35, 35, 39);
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: rgba(251, 249, 169, 0.08);
   color: white;
 }
 aside.store button div.descriptors {
@@ -134,6 +138,10 @@ aside.store button p.manage {
   font-style: italic;
   margin-bottom: 0;
 }
+aside.store button:hover {
+  background-color: rgba(251, 249, 169, 0.2);
+  border-color: rgba(251, 249, 169, 0);
+}
 aside.store div.systems {
   padding: 10px;
   padding-top: 0;
@@ -141,7 +149,8 @@ aside.store div.systems {
   width: 50%;
   max-height: 100%;
   overflow-y: auto;
-  border-right: 2px solid black;
+  border-left: 1px solid rgba(251, 249, 169, 0.3);
+  border-right: 1px solid rgba(251, 249, 169, 0.3);
 }
 aside.store div.systemUpgrades {
   padding: 10px;
@@ -156,12 +165,12 @@ aside.store div.systemUpgrades {
   font-style: italic;
 }
 
-.canBuy {
-  color: green;
+.incomeModifierPositive {
+  color: lightgreen;
 }
 
-.cannotBuy {
-  color: red;
+.incomeModifierNegative {
+  color: rgb(241, 120, 120);
 }
 
 span.descriptor {
@@ -178,31 +187,34 @@ span.descriptor {
 span.descriptor.default {
   border-color: rgb(238, 94, 238);
   color: rgb(238, 94, 238);
-  background-color: rgb(63, 43, 63);
+  background-color: rgba(63, 43, 63, 0.3);
 }
 span.descriptor.max {
   border-color: white;
   color: white;
-  background-color: rgb(54, 54, 54);
+  background-color: rgba(54, 54, 54, 0.3);
 }
 span.descriptor.incomeModifierPositive {
   border-color: lightgreen;
   color: lightgreen;
-  background-color: rgb(30, 54, 30);
+  background-color: rgba(30, 54, 30, 0.3);
 }
 span.descriptor.incomeModifierNegative {
   border-color: red;
   color: red;
-  background-color: rgb(61, 25, 25);
+  background-color: rgba(61, 25, 25, 0.3);
 }
 span.descriptor.incomeModifier0 {
   border-color: white;
   color: white;
-  background-color: rgb(54, 54, 54);
+  background-color: rgba(54, 54, 54, 0.3);
 }
 
 .tooltip {
-  font-family: "Merriweather", serif;
+  pointer-events: none;
+  font-family: "Merriweather", serif !important;
+  border-radius: 10px !important;
+  background-color: rgb(62, 36, 66) !important;
 }
 .tooltip div.tooltipDescriptors {
   width: 50em;
@@ -231,8 +243,16 @@ span.descriptor.incomeModifier0 {
   padding: 0;
 }
 .tooltip div.separator {
-  margin: 5px 1px 0;
+  margin: 5px 0;
   height: 1px;
   width: 100%;
   background-color: white;
+}
+.tooltip ul.addContent {
+  padding: 0;
+  margin: 0;
+  list-style-position: inside;
+}
+.tooltip ul.addContent li {
+  font-size: smaller;
 }/*# sourceMappingURL=index.css.map */

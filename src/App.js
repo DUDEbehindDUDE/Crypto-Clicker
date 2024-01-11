@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+import "tippy.js/animations/shift-away.css";
 import bitcoinImg from "./media/bitcoin.png";
 import "./App.css";
 
@@ -94,7 +95,13 @@ function Bitcoin() {
     clickAudio.play();
   }
   return (
-    <img class="bitcoin" alt="bitcoin" src={bitcoinImg} onClick={onClick} />
+    <img
+      class="bitcoin"
+      alt="bitcoin"
+      draggable="false"
+      src={bitcoinImg}
+      onMouseDown={onClick} // <-- we are using onMouseDown instead of onClick because onClick doesn't work well with cookie wobble
+    />
   );
 }
 
@@ -174,6 +181,11 @@ function Store() {
     }
     setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
+    const randomPlaybackRate = Math.random() / 10 + 0.75;
+    const clickAudio = new Audio("ka-ching.wav");
+    clickAudio.playbackRate = randomPlaybackRate;
+    clickAudio.preservesPitch = false;
+    clickAudio.play();
   }
   // Calculates the price of an item
   function calcItemPrice(item, formatted = false, system = selectedSystem) {
@@ -308,13 +320,13 @@ function Systems({
       baseBps: 0.5,
       items: {
         cpu: {
-          name: "Intel Pentium D",
-          desc: "Can load most web pages",
+          name: "Intel Pentium Gold G6405",
+          desc: "Perfect for basic tasks like checking email and watching cat videos.",
         },
         gpu: {
           name: "Intel UHD Graphics",
           desc: "I don't think it can run crisis",
-        }
+        },
       },
     },
     {
@@ -333,7 +345,7 @@ function Systems({
         gpu: {
           name: "RTX 2190 Ti",
           desc: "Is this even real?",
-        }
+        },
       },
     },
     {
@@ -352,7 +364,7 @@ function Systems({
         gpu: {
           name: "GTX 1060 Ti",
           desc: "A solid GPU for most gamers. The fans glow with RGB, empowering the it with more gaming (and mining) capabilities.",
-        }
+        },
       },
       // upgrades: {
       //   cpu: cpus,
@@ -376,7 +388,7 @@ function Systems({
         gpu: {
           name: "4x RTX 2070 Super",
           desc: "The 'Super' stands for 'SUPERgoodatminingcrypto'!!!!!! And yes, the 4 GPUs all have RGB",
-        }
+        },
       },
     },
   ];
@@ -398,37 +410,42 @@ function Systems({
     const price = systems[index].price;
     buySystem(price, system.name, system);
     owned = ownedItems.systems[system.name] !== undefined;
-    if (owned) setSelected(system.name);
+    if (owned) {
+      setSelected(system.name);
+      const randomPlaybackRate = Math.random() / 10 + 0.75;
+      const clickAudio = new Audio("ka-ching.wav");
+      clickAudio.playbackRate = randomPlaybackRate;
+      clickAudio.preservesPitch = false;
+      clickAudio.play();
+    }
   }
 
-  const systemInfoDescriptors = (index, owned) => {
+  const systemInfoDescriptors = (index, owned, isTooltip = false) => {
     // Returns some system-specific descriptors based on the system's index
     const name = systems[index].name;
     let descriptors = [];
     if (!owned) {
-      const bps = systems[index].baseBps;
       const price = systems[index].price;
-      descriptors.push({ text: "Available", class: "default" });
-      descriptors.push({
-        text: `BPS: ${format(bps)}`,
-        class: "incomeModifierPositive",
-      });
-      descriptors.push({
-        text: `Cost: ${format(price)} btc`,
-        class: buyClass(price),
-      });
+      if (buyClass(price) === "incomeModifierPositive") {
+        descriptors.push({ text: "Available", class: "incomeModifierPositive" });
+      }
+      if (isTooltip) {
+        descriptors.push({ text: `Cost: ${format(price)} btc`, class: buyClass(price) });
+      }
       return descriptors;
     }
 
     const bps = calcSystemBps(name);
     descriptors.push({ text: "Owned", class: "default" });
     if (systemHasUpgrades(name)) {
-      descriptors.push({ text: "Overclocks Available!", class: "default" });
+      descriptors.push({ text: "Overclocks Available!", class: "incomeModifierPositive" });
     }
-    descriptors.push({
-      text: `BPS: ${format(bps)}`,
-      class: "incomeModifierPositive",
-    });
+    if (isTooltip) {
+      descriptors.push({
+        text: `BPS: ${format(bps)}`,
+        class: "incomeModifierPositive",
+      });
+    }
     return descriptors;
   };
 
@@ -453,9 +470,8 @@ function Systems({
 
   const availableSystems = systems.map((system, index) => {
     const owned = ownedItems.systems[system.name] !== undefined;
-    const descriptors = systemInfoDescriptors(index, owned);
     const tooltip = {
-      descriptors: descriptors,
+      descriptors: systemInfoDescriptors(index, owned, true),
       title: system.name,
       desc: system.desc,
     };
@@ -463,17 +479,36 @@ function Systems({
     const button = (
       <ItemButton
         onClick={() => onSystemClick(index, owned)}
-        owned={owned}
+        ownedText={
+          owned
+            ? <>Producing {(
+                <span class={""}>{format(calcSystemBps(system.name))}</span>
+              )} BPS · Manage system {">"}</> // <-- that thing has to be in brackets otherwise it thinks it's an html tag
+            : <span class={buyClass(systems[index].price)}>Purchase system for {format(systems[index].price)} btc</span>
+        }
         object={{
-          descriptors: descriptors,
+          descriptors: systemInfoDescriptors(index, owned),
           title: system.name,
           type: "System",
         }}
       />
     );
 
+    const addContent = owned
+      ? [
+          `${ownedItems.systems[system.name].gpuLevel} overclock(s) on GPU`,
+          `${ownedItems.systems[system.name].cpuLevel} overclock(s) on CPU`,
+          `${ownedItems.systems[system.name].ram} GB of RAM`,
+        ]
+      : [];
+
     return (
-      <TooltipItem key={system.name} element={button} mainItem={tooltip} />
+      <TooltipItem
+        key={system.name}
+        element={button}
+        mainItem={tooltip}
+        additionalContent={addContent}
+      />
     );
   });
 
@@ -488,8 +523,25 @@ function Systems({
 function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
   const { bitcoins } = useContext(Bitcoins);
-  // Price curve: priceModifier * x^(1.5^0.1x)
-  // priceModifier * Math.pow(x, Math.pow(1.5, 0.1x))
+
+  function format(number) {
+    // TODO -- figure out how global functions work in react so I don't have to copy paste this in every prop I use it in
+    if (number >= 1_000_000) {
+      // for numbers bigger than 1 mil, format it like:
+      // 23.456 million (3 decimal places + word)
+      number = Intl.NumberFormat("en", {
+        notation: "compact",
+        compactDisplay: "long",
+        minimumFractionDigits: 3,
+      }).format(number);
+    } else {
+      // For numbers less than 1 mil, we can just format it with
+      // commas (12,345.67). "12.345 thousand" would be really stupid
+      number = Intl.NumberFormat("en", {}).format(number);
+    }
+
+    return number;
+  }
 
   const priceClass = (item) =>
     bitcoins >= calcItemPrice(item)
@@ -528,10 +580,8 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   // };
 
   const buttonDescriptors = (item) => {
-    const priceModifier = ownedItems.systems[selected].priceModifier;
-
     return [
-      { text: `Overclock: +${getLevel(item) * 100}%`, class: "default" },
+      { text: `Overclocks: ${getLevel(item)}`, class: "default" },
       {
         text: `Cost: ${calcItemPrice(item, true)} btc`,
         class: priceClass(item),
@@ -562,13 +612,16 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [
-            { text: "Owned", class: "default" },
-            { text: "BPS: ", class: "incomeModifierPositive" },
-          ],
+          descriptors: [],
           title: ownedItems.systems[selected].items.gpu.name,
           desc: ownedItems.systems[selected].items.gpu.desc,
         }}
+        additionalContent={[
+          `Each overclock increases the BPS (bitcoin per second) produced by the system by ${ownedItems.systems[selected].baseBps} btc`,
+          `Currently overclocked ${getLevel("gpu")} time(s), resulting in +${
+            getLevel("gpu") * ownedItems.systems[selected].baseBps
+          } bps (${getLevel("gpu")}x increase)`,
+        ]}
       />
       <TooltipItem
         element={
@@ -582,14 +635,16 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [
-            { text: "Owned", class: "default" },
-            { text: "BPS: ", class: "incomeModifierPositive" },
-          ],
+          descriptors: [],
           title: ownedItems.systems[selected].items.cpu.name,
           desc: ownedItems.systems[selected].items.cpu.desc,
         }}
-        // additionalContent={[""]}
+        additionalContent={[
+          `Each overclock increases the efficiency of the system by 100%`,
+          `Currently overclocked ${getLevel("cpu")} time(s), resulting in +${
+            getLevel("cpu") * 100
+          }% bps`,
+        ]}
       />
       <TooltipItem
         element={
@@ -603,14 +658,11 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [
-            { text: "Owned", class: "default" },
-            { text: "BPS: ", class: "incomeModifierPositive" },
-          ],
+          descriptors: [],
           title: getLevel("ram") + " GB",
-          desc: "",
+          desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
-        // additionalContent={[""]}
+        additionalContent={["This will increase the amount of bitcoin you earn per click", "!!!This is not implemented yet, however!!!"]}
       />
     </div>
   );
@@ -619,7 +671,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
 function ItemButton({
   object,
   onClick,
-  owned = undefined, // if supplied, renders "click to buy" or "click to manage" underneath
+  ownedText = undefined, // if supplied, renders the text underneath
 }) {
   // object = {
   //   descriptors: [
@@ -629,6 +681,7 @@ function ItemButton({
   //   title: "Your Grandma's Old PC",
   //   type: "System",
   // };
+  
   const descriptors = object.descriptors.map((descriptor, index) => (
     <span
       key={`${descriptor.text}${index}`}
@@ -637,18 +690,12 @@ function ItemButton({
       {descriptor.text}
     </span>
   ));
-  const manageText = () => {
-    if (owned === undefined) {
-      return;
-    }
-    return owned ? "Click to manage system >" : "Click to purchase system";
-  };
   return (
     <button onClick={onClick}>
       <div class="descriptors">{descriptors}</div>
       <p class="buttonTitle">{object.title}</p>
       <p class="buttonType">{object.type}</p>
-      <p class="manage">{manageText()}</p>
+      <p class="manage">{ownedText}</p>
     </button>
   );
 }
@@ -679,14 +726,7 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
     const separator =
       additionalContent.length > 0 ? <div class="separator" /> : null;
     const _additionalContent = additionalContent.map((item) => {
-      return (
-        <span
-          key={`tooltipAddItem${mainItem.title}${item}`}
-          class={"tooltipAddItem"}
-        >
-          {item}
-        </span>
-      );
+      return <li key={`tooltipAddItem${mainItem.title}${item}`}>{item}</li>;
     });
     return (
       <>
@@ -698,20 +738,26 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
           </aside>
         </div>
         {separator}
-        {_additionalContent}
+        <ul class="addContent">{_additionalContent}</ul>
       </>
     );
   };
 
   return (
-    <Tippy className="tooltip" placement="left" content={tooltip()}>
+    <Tippy
+      className="tooltip"
+      placement="left"
+      arrow={false}
+      animation={"shift-away"}
+      content={tooltip()}
+    >
       <span>{element}</span>
     </Tippy>
   );
 }
 
 function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
-  // Upgrades
+  // Upgrades -- this is old code (not used anymore) and will probably get removed if I don't forget
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
   const [level, setLevel] = useState(1);
