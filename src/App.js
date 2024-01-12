@@ -15,7 +15,7 @@ const OwnedItems = createContext();
  * with this code.
  *
  * I know this code is an eye-soar, but this is what happens when you have to submit code as a .pdf
- * All sprites contained in this project were generated with the help of Dall-E and/or Midjourney
+ * Many sprites contained in this project were generated with the help of Dall-E and/or Midjourney
  */
 
 // Entry point for code
@@ -52,21 +52,23 @@ function App() {
   // note: set ownedItems.hasChange to true, otherwise it won't update
   useEffect(() => {
     console.log("recalculating BPS");
-    let newBps = 0;
-    const systems = ownedItems.systems;
-
-    for (const system in systems) {
-      const currentSystem = systems[system];
-      let systemBps = (currentSystem.gpuLevel + 1) * currentSystem.baseBps;
-      systemBps *= currentSystem.cpuLevel + 1; // note: need to tune this later
-      newBps += systemBps;
-      // newCps += systemBps * (Math.log2(currentSystem.ram) - 1) ** 2;
-    }
+    let newBps = calculateBps(ownedItems.systems);
+    
     const resetChanges = ownedItems;
     resetChanges.hasChange = false;
     setOwnedItems(resetChanges);
     setBps(newBps);
   }, [ownedItems.hasChange]);
+  function calculateBps(systems)  {
+    let bps = 0;
+    for (const system in systems) {
+      const currentSystem = systems[system];
+      let systemBps = (currentSystem.gpuLevel + 1) * currentSystem.baseBps;
+      systemBps *= currentSystem.cpuLevel + 1;
+      bps += systemBps;
+    }
+    return bps;
+  }
 
   return (
     <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
@@ -100,7 +102,7 @@ function Bitcoin() {
       alt="bitcoin"
       draggable="false"
       src={bitcoinImg}
-      onMouseDown={onClick} // <-- we are using onMouseDown instead of onClick because onClick doesn't work well with cookie wobble
+      onMouseDown={onClick} // <-- we are using onMouseDown instead of onClick because onClick doesn't work well with coin wobble
     />
   );
 }
@@ -141,14 +143,11 @@ function Store() {
   // Everything you can buy is part of this component
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
-  const [upgradesAvailable, setUpgradesAvailable] = useState(false);
+  // const [upgradesAvailable, setUpgradesAvailable] = useState(false);
   const [selectedSystem, setSelectedSystem] = useState(null); // string, like "Your Grandma's Old PC"
 
   function buySystem(price, name, properties) {
-    // exampleProperties = {
-    //   baseBps: 0.1,
-    //   priceModifier: 1,
-    // }
+    // buys a system if you can afford it
     if (price > bitcoins) return;
 
     let newOwnedItems = ownedItems;
@@ -161,9 +160,11 @@ function Store() {
     setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
   }
-  function buyUpgrade(item) {
+  function buyOverclock(item) {
+    // buys an overclock if you can afford it
     const price = calcItemPrice(item, false, selectedSystem);
     if (price > bitcoins) return;
+    
     let newOwnedItems = ownedItems;
     newOwnedItems.hasChange = true;
     switch (item) {
@@ -261,7 +262,7 @@ function Store() {
       />
       <SystemUpgrades
         selected={selectedSystem}
-        buyItem={buyUpgrade}
+        buyItem={buyOverclock}
         ownedItems={ownedItems}
         calcItemPrice={calcItemPrice}
       />
@@ -276,39 +277,6 @@ function Systems({
   calcSystemBps,
   systemHasUpgrades,
 }) {
-  // All the data for systems upgrades is stored here
-  // Most Systems and descriptions were generated with Bard (https://bard.google.com/)
-  const cpus = [
-    {
-      name: "Intel Pentium Gold G6405",
-      desc: "Came with the PC. Perfect for basic tasks like checking email and watching cat videos.",
-      clock: "Base clock: 4.1 GHz",
-    },
-    {
-      name: "AMD Athlon 3000G",
-      desc: "This budget 4-core processor is like that surprisingly good movie you found on Netflix. It might not be a blockbuster, but it'll get the job done.",
-      clock: "Base clock: 3.5 GHz, Boost clock: 3.8 GHz",
-    },
-    {
-      name: "Intel Core i3-12100F",
-      desc: "This entry-level 6-core processor is not the flashiest, but it'll get you where you need to go.",
-      clock: "Base clock: 3.3 GHz, Boost clock: 4.3 GHz.",
-    },
-  ];
-  const gpus = [
-    {
-      name: "Intel UHD Graphics",
-      desc: "It can't run Crysis. There's no point trying.",
-      price: 0,
-      bps: 0.5,
-    },
-    {
-      name: "NVIDIA GeForce GT 710",
-      desc: "The official graphics card of office computers everywhere. Don't expect miracles.",
-      price: 100,
-      bps: 1,
-    },
-  ];
   const systems = [
     {
       name: "Your Grandma's Old PC",
@@ -366,11 +334,6 @@ function Systems({
           desc: "A solid GPU for most gamers. The fans glow with RGB, empowering the it with more gaming (and mining) capabilities.",
         },
       },
-      // upgrades: {
-      //   cpu: cpus,
-      //   gpu: gpus,
-      //   ram: { base: 2, max: 2 ** 16 },
-      // },
     },
     {
       name: "Crypto Mining Rig",
@@ -399,18 +362,27 @@ function Systems({
   const buyClass = (price) =>
     price > bitcoins ? "incomeModifierNegative" : "incomeModifierPositive";
 
-  function onSystemClick(index, owned) {
+  function onSystemClick(index) {
     const system = systems[index];
 
-    if (owned) {
+    const owned = () => {
+      console.log(system.name + "system.name");
+      for (const ownedSystem in ownedItems.systems) {
+        console.log(ownedSystem + "ownedItems.systems");
+        if (ownedSystem === system.name) return true;
+      }
+      return false;
+    }
+
+    if (owned()) {
       setSelected(system.name);
       return;
     }
 
     const price = systems[index].price;
     buySystem(price, system.name, system);
-    owned = ownedItems.systems[system.name] !== undefined;
-    if (owned) {
+    
+    if (owned()) {
       setSelected(system.name);
       const randomPlaybackRate = Math.random() / 10 + 0.75;
       const clickAudio = new Audio("ka-ching.wav");
@@ -478,7 +450,7 @@ function Systems({
 
     const button = (
       <ItemButton
-        onClick={() => onSystemClick(index, owned)}
+        onClick={() => onSystemClick(index)}
         ownedText={
           owned
             ? <>Producing {(
