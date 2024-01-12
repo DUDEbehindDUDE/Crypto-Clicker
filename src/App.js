@@ -156,7 +156,6 @@ function Store() {
     newOwnedItems.systems[name].cpuLevel = 0;
     newOwnedItems.systems[name].gpuLevel = 0;
     newOwnedItems.systems[name].ram = 2;
-    console.log(newOwnedItems);
     setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
   }
@@ -366,9 +365,7 @@ function Systems({
     const system = systems[index];
 
     const owned = () => {
-      console.log(system.name + "system.name");
       for (const ownedSystem in ownedItems.systems) {
-        console.log(ownedSystem + "ownedItems.systems");
         if (ownedSystem === system.name) return true;
       }
       return false;
