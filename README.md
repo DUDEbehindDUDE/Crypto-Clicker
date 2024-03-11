@@ -1,4 +1,4 @@
-# APCSP-Create-PT
-A project that I made for the 2023 Create PT Task
+# Crypto Clicker
+A project that was initially made for the 2023 Create PT Task
 
-Disclaimer: yes I know this code is awful I mean I have everything in a single file and there are a lot of things that are terribly unoptimised, but collegeboard also wants me to submit this as a pdf... so blame them
+Disclaimer: Currently, the code is quite bad, and everything is in a single file because of the requirements for the AP Create PT task. I plan on refactoring the code and converting it to typescript at some point, that point just hasn't come yet.
