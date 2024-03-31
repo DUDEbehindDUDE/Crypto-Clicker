@@ -22,6 +22,7 @@ const OwnedItems = createContext();
 function App() {
   const [bitcoins, setBitcoins] = useState(0);
   const [bps, setBps] = useState(0); // bitcoin per second
+  const [bitcoinPerClick, setBitcoinPerClick] = useState(1);
   const [ownedItems, setOwnedItems] = useState({
     // This is an object containing all the items the player owns and what upgrades they have purchased
     hasChange: true,
@@ -48,15 +49,18 @@ function App() {
     setBitcoins((bitcoins) => bitcoins + bps / 10);
   }
 
-  // Recalculate BPS when owned items changes
+  // Recalculate BPS and bitcoin per click when owned items changes
   // note: set ownedItems.hasChange to true, otherwise it won't update
   useEffect(() => {
     const newBps = calculateBps(ownedItems.systems);
+    const newBitcoinPerClick = calculateBtcPerClick(ownedItems.systems);
     const resetChanges = ownedItems;
     resetChanges.hasChange = false;
     setOwnedItems(resetChanges);
     setBps(newBps);
+    setBitcoinPerClick(newBitcoinPerClick);
   }, [ownedItems.hasChange]);
+
   function calculateBps(systems) {
     console.log("recalculating BPS");
     let bps = 0;
@@ -69,13 +73,25 @@ function App() {
     return bps;
   }
 
+  function calculateBtcPerClick(systems) {
+    let bpc = 0;
+    for (const system in systems) {
+      const currentSystem = systems[system];
+      const systemBpc = currentSystem.ram;
+      if (systemBpc != 1) bpc += systemBpc;
+    }
+    if (bpc < 1) bpc = 1;
+
+    return bpc;
+  }
+
   return (
     <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
       <Bps.Provider value={{ bps }}>
         <OwnedItems.Provider value={{ ownedItems, setOwnedItems }}>
           <div class="mainContent">
             <MainCounters total={bitcoins} bps={bps} />
-            <Bitcoin />
+            <Bitcoin bitcoinPerClick={bitcoinPerClick} />
           </div>
           <Store />
         </OwnedItems.Provider>
@@ -85,10 +101,10 @@ function App() {
 }
 
 // The coin
-function Bitcoin() {
+function Bitcoin({ bitcoinPerClick }) {
   const { setBitcoins } = useContext(Bitcoins);
   function onClick() {
-    setBitcoins((bitcoins) => bitcoins + 1);
+    setBitcoins((current) => current + bitcoinPerClick);
     const randomPlaybackRate = Math.random() / 10 + 0.75;
     const clickAudio = new Audio("click.wav");
     clickAudio.playbackRate = randomPlaybackRate;
@@ -207,7 +223,7 @@ function Store() {
       case "ram":
         priceModifier = ownedItems.systems[system].priceModifier;
         level = ownedItems.systems[system].ram;
-        price = priceModifier * 1.15 ** level; // each ram increases cost by 15%
+        price = priceModifier * 5 * 1.6 ** level; // each ram increases cost by 15%
         break;
       default:
         throw `Invalid item ${item}`;
@@ -252,7 +268,7 @@ function Store() {
   function calcSystemBps(system) {
     system = ownedItems.systems[system];
     let systemBps = (system.gpuLevel + 1) * system.baseBps;
-    systemBps *= 2 ** system.cpuLevel; // note: need to tune this later
+    systemBps *= 2 ** system.cpuLevel;
     return systemBps;
   }
 
@@ -691,8 +707,8 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
         additionalContent={[
-          "This will increase the amount of bitcoin you earn per click",
-          "!!!This is not implemented yet, however!!!",
+          "Each GB of RAM increases the amount of bitcoin earned per click by 1",
+          getLevel("ram") === 1 ? "Not yet upgraded, resulting in no additional bitcoin per click" : `Currently at ${getLevel("ram")}GB, resulting in +${getLevel("ram")} bitcoin per click`,
         ]}
       />
     </div>
