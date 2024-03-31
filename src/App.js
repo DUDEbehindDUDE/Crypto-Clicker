@@ -51,20 +51,19 @@ function App() {
   // Recalculate BPS when owned items changes
   // note: set ownedItems.hasChange to true, otherwise it won't update
   useEffect(() => {
-    console.log("recalculating BPS");
-    let newBps = calculateBps(ownedItems.systems);
-    
+    const newBps = calculateBps(ownedItems.systems);
     const resetChanges = ownedItems;
     resetChanges.hasChange = false;
     setOwnedItems(resetChanges);
     setBps(newBps);
   }, [ownedItems.hasChange]);
-  function calculateBps(systems)  {
+  function calculateBps(systems) {
+    console.log("recalculating BPS");
     let bps = 0;
     for (const system in systems) {
       const currentSystem = systems[system];
       let systemBps = (currentSystem.gpuLevel + 1) * currentSystem.baseBps;
-      systemBps *= currentSystem.cpuLevel + 1;
+      systemBps *= 2 ** currentSystem.cpuLevel;
       bps += systemBps;
     }
     return bps;
@@ -85,8 +84,8 @@ function App() {
   );
 }
 
+// The coin
 function Bitcoin() {
-  // The coin
   const { setBitcoins } = useContext(Bitcoins);
   function onClick() {
     setBitcoins((bitcoins) => bitcoins + 1);
@@ -102,13 +101,13 @@ function Bitcoin() {
       alt="bitcoin"
       draggable="false"
       src={bitcoinImg}
-      onMouseDown={onClick} // <-- we are using onMouseDown instead of onClick because onClick doesn't work well with coin wobble
-    />
+      onMouseDown={onClick} // <-- we are using onMouseDown instead of onClick
+    /> //                      because onClick doesn't work well with coin wobble
   );
 }
 
+// Bitcoin and bps counter
 function MainCounters({ total, bps }) {
-  // Bitcoin and bps counter
   total = Math.floor(total);
   if (total >= 1_000_000) {
     total = Intl.NumberFormat("en", {
@@ -139,15 +138,15 @@ function MainCounters({ total, bps }) {
   );
 }
 
+// Everything you can buy is part of this component
 function Store() {
-  // Everything you can buy is part of this component
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
   // const [upgradesAvailable, setUpgradesAvailable] = useState(false);
   const [selectedSystem, setSelectedSystem] = useState(null); // string, like "Your Grandma's Old PC"
 
+  // Buys a system if you can afford it
   function buySystem(price, name, properties) {
-    // buys a system if you can afford it
     if (price > bitcoins) return;
 
     let newOwnedItems = ownedItems;
@@ -155,15 +154,16 @@ function Store() {
     newOwnedItems.systems[name] = properties;
     newOwnedItems.systems[name].cpuLevel = 0;
     newOwnedItems.systems[name].gpuLevel = 0;
-    newOwnedItems.systems[name].ram = 2;
+    newOwnedItems.systems[name].ram = 1;
     setBitcoins(bitcoins - price);
     setOwnedItems(newOwnedItems);
   }
+
+  // Buys an overclock if you can afford it
   function buyOverclock(item) {
-    // buys an overclock if you can afford it
     const price = calcItemPrice(item, false, selectedSystem);
     if (price > bitcoins) return;
-    
+
     let newOwnedItems = ownedItems;
     newOwnedItems.hasChange = true;
     switch (item) {
@@ -187,27 +187,31 @@ function Store() {
     clickAudio.preservesPitch = false;
     clickAudio.play();
   }
+
   // Calculates the price of an item
   function calcItemPrice(item, formatted = false, system = selectedSystem) {
-    let level = 1;
+    let level;
     let priceModifier;
+    let price;
     switch (item) {
       case "cpu":
         priceModifier = 30 * ownedItems.systems[system].priceModifier;
-        level += ownedItems.systems[system].cpuLevel;
+        level = ownedItems.systems[system].cpuLevel;
+        price = priceModifier * 0.3 * 8 ** level; // each upgrade increases cost by 15%
         break;
       case "gpu":
         priceModifier = ownedItems.systems[system].priceModifier;
-        level += ownedItems.systems[system].gpuLevel;
+        level = ownedItems.systems[system].gpuLevel;
+        price = priceModifier * 1.15 ** level; // each upgrade increases cost by 1200%
         break;
       case "ram":
         priceModifier = ownedItems.systems[system].priceModifier;
-        level += ownedItems.systems[system].ram;
+        level = ownedItems.systems[system].ram;
+        price = priceModifier * 1.15 ** level; // each ram increases cost by 15%
         break;
       default:
         throw `Invalid item ${item}`;
     }
-    let price = priceModifier * 1.15 ** level; // each upgrade increases cost by 15%
 
     price = Math.round(price); // no decimals
     if (!formatted) {
@@ -231,6 +235,7 @@ function Store() {
 
     return price;
   }
+
   // Checks if a system has upgrades available
   function systemHasUpgrades(system) {
     if (bitcoins >= calcItemPrice("cpu", false, system)) {
@@ -242,11 +247,12 @@ function Store() {
     }
     return false;
   }
+
   // Calculates how many bps a system is producing
   function calcSystemBps(system) {
     system = ownedItems.systems[system];
     let systemBps = (system.gpuLevel + 1) * system.baseBps;
-    systemBps *= system.cpuLevel + 1; // note: need to tune this later
+    systemBps *= 2 ** system.cpuLevel; // note: need to tune this later
     return systemBps;
   }
 
@@ -269,6 +275,7 @@ function Store() {
   );
 }
 
+// Systems (things u can buy)
 function Systems({
   setSelected,
   buySystem,
@@ -276,34 +283,57 @@ function Systems({
   calcSystemBps,
   systemHasUpgrades,
 }) {
+  // Variables
+  const { bitcoins } = useContext(Bitcoins);
+
+  // This is the data for all of the systems that you can buy.
   const systems = [
     {
       name: "Your Grandma's Old PC",
       desc: "She never learned how to use it, so she's letting you have it for cheap.",
       unlocksAt: 0,
       special: null,
-      price: 20,
-      priceModifier: 20,
-      baseBps: 0.5,
+      price: 10,
+      priceModifier: 10,
+      baseBps: 0.1,
       items: {
         cpu: {
-          name: "Intel Pentium Gold G6405",
+          name: "Intel® Celeron® J3355 2.0GHz 2 Core",
           desc: "Perfect for basic tasks like checking email and watching cat videos.",
         },
         gpu: {
-          name: "Intel UHD Graphics",
+          name: "Intel® HD Graphics 500",
           desc: "I don't think it can run crisis",
+        },
+      },
+    },
+    {
+      name: "Dell Optiplex 3050 SFF Desktop PC",
+      desc: "Official computer of offices everywhere",
+      unlocksAt: 50,
+      special: null,
+      price: 165,
+      priceModifier: 165,
+      baseBps: 2,
+      items: {
+        cpu: {
+          name: "Intel® Core™ i5-6500 3.2GHz 4 Core",
+          desc: "Pulled straight from the Amazon listing",
+        },
+        gpu: {
+          name: "Intel® HD Graphics 530",
+          desc: "Runs Minecraft at at least 30fps",
         },
       },
     },
     {
       name: "AliExpress Gaming PC",
       desc: "The Chinese might be spying on you, but it'll at least mine some coins (maybe??)",
-      unlocksAt: 200,
+      unlocksAt: 800,
       special: null,
-      price: 500,
-      priceModifier: 500,
-      baseBps: 10,
+      price: 1250,
+      priceModifier: 1250,
+      baseBps: 16,
       items: {
         cpu: {
           name: "Intel i-8 Cores",
@@ -320,7 +350,7 @@ function Systems({
       desc: "Includes RGB for increased performance",
       unlocksAt: 200,
       special: null,
-      price: 5500,
+      price: 12500,
       priceModifier: 5500,
       baseBps: 65,
       items: {
@@ -339,7 +369,7 @@ function Systems({
       desc: "Has slots for multiple GPUs, so it can mine more coins.",
       unlocksAt: 10000,
       special: null,
-      price: 16500,
+      price: 150000,
       priceModifier: 16500,
       baseBps: 250,
       items: {
@@ -349,18 +379,17 @@ function Systems({
         },
         gpu: {
           name: "4x RTX 2070 Super",
-          desc: "The 'Super' stands for 'SUPERgoodatminingcrypto'!!!!!! And yes, the 4 GPUs all have RGB",
+          desc: "The 'Super' stands for 'SUPER-goodatminingcrypto'!!!!!! And yes, the 4 GPUs all have RGB",
         },
       },
     },
   ];
 
-  // Variables
-  const { bitcoins } = useContext(Bitcoins);
-
+  // returns the css class based on price
   const buyClass = (price) =>
     price > bitcoins ? "incomeModifierNegative" : "incomeModifierPositive";
 
+  // do stuff when you click on system (try to buy it or switch to the system)
   function onSystemClick(index) {
     const system = systems[index];
 
@@ -369,7 +398,7 @@ function Systems({
         if (ownedSystem === system.name) return true;
       }
       return false;
-    }
+    };
 
     if (owned()) {
       setSelected(system.name);
@@ -378,7 +407,7 @@ function Systems({
 
     const price = systems[index].price;
     buySystem(price, system.name, system);
-    
+
     if (owned()) {
       setSelected(system.name);
       const randomPlaybackRate = Math.random() / 10 + 0.75;
@@ -389,17 +418,23 @@ function Systems({
     }
   }
 
+  // Returns some system-specific descriptors based on the system's index
   const systemInfoDescriptors = (index, owned, isTooltip = false) => {
-    // Returns some system-specific descriptors based on the system's index
     const name = systems[index].name;
     let descriptors = [];
     if (!owned) {
       const price = systems[index].price;
       if (buyClass(price) === "incomeModifierPositive") {
-        descriptors.push({ text: "Available", class: "incomeModifierPositive" });
+        descriptors.push({
+          text: "Available",
+          class: "incomeModifierPositive",
+        });
       }
       if (isTooltip) {
-        descriptors.push({ text: `Cost: ${format(price)} btc`, class: buyClass(price) });
+        descriptors.push({
+          text: `Cost: ${format(price)} btc`,
+          class: buyClass(price),
+        });
       }
       return descriptors;
     }
@@ -407,7 +442,10 @@ function Systems({
     const bps = calcSystemBps(name);
     descriptors.push({ text: "Owned", class: "default" });
     if (systemHasUpgrades(name)) {
-      descriptors.push({ text: "Overclocks Available!", class: "incomeModifierPositive" });
+      descriptors.push({
+        text: "Overclocks Available!",
+        class: "incomeModifierPositive",
+      });
     }
     if (isTooltip) {
       descriptors.push({
@@ -418,8 +456,8 @@ function Systems({
     return descriptors;
   };
 
+  // Format numbers so they looks pretty ✨✨
   function format(number) {
-    // Format numbers so they looks pretty ✨✨
     if (number >= 1_000_000) {
       // for numbers bigger than 1 mil, format it like:
       // 23.456 million (3 decimal places + word)
@@ -437,6 +475,9 @@ function Systems({
     return number;
   }
 
+  // Renders all systems. Currently, all systems are by default available, but
+  // they might become available based on price (like cookie clicker) later on
+  // (if this comment is still here then I never implemented that)
   const availableSystems = systems.map((system, index) => {
     const owned = ownedItems.systems[system.name] !== undefined;
     const tooltip = {
@@ -445,15 +486,22 @@ function Systems({
       desc: system.desc,
     };
 
+    // render button
     const button = (
       <ItemButton
         onClick={() => onSystemClick(index)}
         ownedText={
-          owned
-            ? <>Producing {(
-                <span class={""}>{format(calcSystemBps(system.name))}</span>
-              )} BPS · Manage system {">"}</> // <-- that thing has to be in brackets otherwise it thinks it's an html tag
-            : <span class={buyClass(systems[index].price)}>Purchase system for {format(systems[index].price)} btc</span>
+          owned ? ( // the {" "} is literally just a space, if I don't have that there there is no space
+            <>
+              Producing{" "} 
+              {<span class={""}>{format(calcSystemBps(system.name))}</span>} BPS
+              · Manage system {">"}
+            </> // and the > is in brackets because otherwise, it thinks it's an HTML tag or whatever
+          ) : (
+            <span class={buyClass(systems[index].price)}>
+              Purchase system for {format(systems[index].price)} btc
+            </span>
+          )
         }
         object={{
           descriptors: systemInfoDescriptors(index, owned),
@@ -463,6 +511,7 @@ function Systems({
       />
     );
 
+    // adds some production stats if the item is owned. Else, it doesn't
     const addContent = owned
       ? [
           `${ownedItems.systems[system.name].gpuLevel} overclock(s) on GPU`,
@@ -535,7 +584,8 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
     return level;
   }
 
-  // const exampleOwnedItems = {
+  // example: (wish I used typescript now :P)
+  // exampleOwnedItems = {
   //   systems: {
   //     example: {
   //       baseBps: 0.1,
@@ -549,15 +599,18 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   // };
 
   const buttonDescriptors = (item) => {
-    return [
-      { text: `Overclocks: ${getLevel(item)}`, class: "default" },
-      {
-        text: `Cost: ${calcItemPrice(item, true)} btc`,
-        class: priceClass(item),
-      },
-    ];
+    return [{ text: `Overclocks: ${getLevel(item)}`, class: "default" }];
   };
 
+  const ownedText = (item) => {
+    return (
+      <span class={priceClass(item)}>
+        Purchase overclock for {calcItemPrice(item, true)} btc
+      </span>
+    );
+  };
+
+  // If no system has been selected yet, display this
   if (selected === null) {
     return (
       <div class="systemUpgrades">
@@ -566,6 +619,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
       </div>
     );
   }
+  // Otherwise display upgrades
   return (
     <div class="systemUpgrades">
       <h3>Upgrades for {selected}</h3>
@@ -578,6 +632,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
               title: ownedItems.systems[selected].items.gpu.name,
               type: "GPU",
             }}
+            ownedText={ownedText("gpu")}
           />
         }
         mainItem={{
@@ -587,9 +642,11 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
         }}
         additionalContent={[
           `Each overclock increases the BPS (bitcoin per second) produced by the system by ${ownedItems.systems[selected].baseBps} btc`,
-          `Currently overclocked ${getLevel("gpu")} time(s), resulting in +${
+          `Currently overclocked ${getLevel(
+            "gpu"
+          )} time(s), resulting in +${format(
             getLevel("gpu") * ownedItems.systems[selected].baseBps
-          } bps (${getLevel("gpu")}x increase)`,
+          )} bps (${getLevel("gpu")}x increase)`,
         ]}
       />
       <TooltipItem
@@ -601,6 +658,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
               title: ownedItems.systems[selected].items.cpu.name,
               type: "CPU",
             }}
+            ownedText={ownedText("cpu")}
           />
         }
         mainItem={{
@@ -609,10 +667,10 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           desc: ownedItems.systems[selected].items.cpu.desc,
         }}
         additionalContent={[
-          `Each overclock increases the efficiency of the system by 100%`,
-          `Currently overclocked ${getLevel("cpu")} time(s), resulting in +${
-            getLevel("cpu") * 100
-          }% bps`,
+          `Each overclock doubles the production of the system`,
+          `Currently overclocked ${getLevel("cpu")} time(s), resulting in ${
+            2 ** getLevel("cpu") * 100
+          }% production`,
         ]}
       />
       <TooltipItem
@@ -624,6 +682,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
               title: `${getLevel("ram")} GB`,
               type: "RAM",
             }}
+            ownedText={ownedText("ram")}
           />
         }
         mainItem={{
@@ -631,26 +690,21 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           title: getLevel("ram") + " GB",
           desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
-        additionalContent={["This will increase the amount of bitcoin you earn per click", "!!!This is not implemented yet, however!!!"]}
+        additionalContent={[
+          "This will increase the amount of bitcoin you earn per click",
+          "!!!This is not implemented yet, however!!!",
+        ]}
       />
     </div>
   );
 }
 
+// These are the buttons that you can click to buy/select systems/upgrades
 function ItemButton({
   object,
   onClick,
   ownedText = undefined, // if supplied, renders the text underneath
 }) {
-  // object = {
-  //   descriptors: [
-  //     { text: "Cost: 50 btc", class: "" },
-  //     { text: "BPS: 5", class: "" },
-  //   ],
-  //   title: "Your Grandma's Old PC",
-  //   type: "System",
-  // };
-  
   const descriptors = object.descriptors.map((descriptor, index) => (
     <span
       key={`${descriptor.text}${index}`}
@@ -669,6 +723,7 @@ function ItemButton({
   );
 }
 
+// Renders a tooltip when hovered over the element inputted
 function TooltipItem({ element, mainItem, additionalContent = [] }) {
   // Examples
   // mainItem = {
@@ -681,6 +736,7 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
   // };
   // additionalContent = [/* array of strings */];
 
+  // Tooltip content
   const tooltip = () => {
     const descriptors = mainItem.descriptors.map((descriptor) => (
       <span
@@ -725,8 +781,8 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
   );
 }
 
+// Global Upgrades -- this is old code (not used anymore) and will probably get removed if I don't forget
 function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
-  // Upgrades -- this is old code (not used anymore) and will probably get removed if I don't forget
   const { bitcoins, setBitcoins } = useContext(Bitcoins);
   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
   const [level, setLevel] = useState(1);
