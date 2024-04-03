@@ -717,9 +717,13 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
         }}
         additionalContent={[
           `Each overclock doubles the production of the system`,
-          `Currently overclocked ${getLevel("cpu")} time(s), resulting in ${
-            2 ** getLevel("cpu") * 100
-          }% production`,
+          getLevel("cpu") == 0
+            ? "Not yet overclocked, resulting in no production boost"
+            : `Currently overclocked ${getLevel(
+                "cpu"
+              )} time(s), resulting in a ${
+                2 ** getLevel("cpu")
+              }x production boost`,
         ]}
       />
       <TooltipItem
