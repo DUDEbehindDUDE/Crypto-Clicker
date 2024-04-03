@@ -44,10 +44,11 @@ function App() {
     return () => {
       clearInterval(bpsInterval);
     };
+
+    function handleBps() {
+      setBitcoins((bitcoins) => bitcoins + bps / 10);
+    }
   }, [bps]);
-  function handleBps() {
-    setBitcoins((bitcoins) => bitcoins + bps / 10);
-  }
 
   // Recalculate BPS and bitcoin per click when owned items changes
   // note: set ownedItems.hasChange to true, otherwise it won't update
@@ -59,7 +60,7 @@ function App() {
     setOwnedItems(resetChanges);
     setBps(newBps);
     setBitcoinPerClick(newBitcoinPerClick);
-  }, [ownedItems.hasChange]);
+  }, [ownedItems.hasChange, ownedItems]);
 
   // Calculates the bps every time owned items change
   function calculateBps(systems) {
@@ -81,7 +82,7 @@ function App() {
     for (const system in systems) {
       const currentSystem = systems[system];
       const systemBpc = currentSystem.ram;
-      if (systemBpc != 1) bpc += systemBpc;
+      if (systemBpc !== 1) bpc += systemBpc;
     }
     if (bpc < 1) bpc = 1;
 
@@ -210,7 +211,7 @@ function Store() {
         newOwnedItems.systems[selectedSystem].gpuLevel++;
         break;
       default:
-        throw "Item value " + item + " is not valid";
+        throw new Error("Item value " + item + " is not valid");
     }
 
     // Buy item
@@ -251,7 +252,7 @@ function Store() {
         price = priceModifier * 5 * 1.6 ** level;
         break;
       default:
-        throw `Invalid item ${item}`;
+        throw new Error(`Invalid item ${item}`);
     }
 
     price = Math.round(price); // no decimals
@@ -581,7 +582,7 @@ function Systems({
 
 // Renders overclocks/upgrades for the selected system
 function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
-  const { ownedItems, setOwnedItems } = useContext(OwnedItems);
+  const { ownedItems } = useContext(OwnedItems);
   const { bitcoins } = useContext(Bitcoins);
 
   function format(number) {
@@ -621,7 +622,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
         level = ownedItems.systems[selected].ram;
         break;
       default:
-        throw `${item} is not a valid item`;
+        throw new Error(`${item} is not a valid item`);
     }
     return level;
   }
