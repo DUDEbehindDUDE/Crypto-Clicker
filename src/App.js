@@ -99,6 +99,7 @@ function App() {
           <div class="mainContent">
             <MainCounters total={bitcoins} bps={bps} />
             <Bitcoin bitcoinPerClick={bitcoinPerClick} />
+            <SecondaryCounters bpc={bitcoinPerClick} />
           </div>
           <Store />
         </OwnedItems.Provider>
@@ -167,6 +168,10 @@ function MainCounters({ total, bps }) {
       <p class="bitcoinPerSecond">per second: {bps}</p>
     </div>
   );
+}
+
+function SecondaryCounters({ bpc }) {
+  return <p class="clickingPower">Clicking Power: {bpc} bitcoin per click</p>;
 }
 
 // Everything you can buy is part of this component
@@ -649,9 +654,10 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   };
 
   const ownedText = (item) => {
+    const itemText = item === "ram" ? "Upgrade" : "Overclock";
     return (
       <span class={priceClass(item)}>
-        Purchase overclock for {calcItemPrice(item, true)} btc
+        Purchase {itemText} for {calcItemPrice(item, true)} btc
       </span>
     );
   };
@@ -717,7 +723,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
         }}
         additionalContent={[
           `Each overclock doubles the production of the system`,
-          getLevel("cpu") == 0
+          getLevel("cpu") === 0
             ? "Not yet overclocked, resulting in no production boost"
             : `Currently overclocked ${getLevel(
                 "cpu"
@@ -745,10 +751,10 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
         additionalContent={[
-          "Each GB of RAM increases the amount of bitcoin earned per click by 1",
+          "Each gigabyte of RAM increases the clicking power by 1 bitcoin per click",
           getLevel("ram") === 1
-            ? "Not yet upgraded, resulting in no additional bitcoin per click"
-            : `Currently at ${getLevel("ram")}GB, resulting in +${getLevel(
+            ? "Not yet upgraded, resulting in no additional clicking power"
+            : `Currently at ${getLevel("ram")} GB, resulting in +${getLevel(
                 "ram"
               )} bitcoin per click`,
         ]}
@@ -841,48 +847,49 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
 
 // Global Upgrades -- this is old code (not used anymore) and will probably get removed if I don't forget
 // If this isn't removed it is because I plan on implementing this system on my own time after the AP exam
-function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
-  const { bitcoins, setBitcoins } = useContext(Bitcoins);
-  const { ownedItems, setOwnedItems } = useContext(OwnedItems);
-  const [level, setLevel] = useState(1);
-  const [cost, setCost] = useState(price);
-  const [locked, setLocked] = useState(false);
 
-  function upgrade() {
-    if (bitcoins < cost) return;
-    if (level >= maxLevel) {
-      setLocked(true);
-      return;
-    }
-    setBitcoins(bitcoins - cost);
-    setLevel(level + 1);
-    setCost(price * priceMultiplier * level);
-    if (level >= maxLevel) setLocked(true);
-
-    let newOwnedItems = ownedItems;
-    newOwnedItems.upgrades.push({ bps: bpsPerUpgrade });
-    newOwnedItems.hasChange = true;
-    setOwnedItems(newOwnedItems);
-  }
-
-  function determineLocked() {
-    if (locked === true) {
-      return <p>Level: Max!</p>;
-    } else {
-      return (
-        <>
-          <p>Level: {level}</p>
-          <p>Cost: {cost} btc</p>
-        </>
-      );
-    }
-  }
-  return (
-    <button class="upgrade" onClick={upgrade}>
-      <p>{name}</p>
-      {determineLocked()}
-    </button>
-  );
-}
+// function Upgrade({ name, price, priceMultiplier, bpsPerUpgrade, maxLevel }) {
+//   const { bitcoins, setBitcoins } = useContext(Bitcoins);
+//   const { ownedItems, setOwnedItems } = useContext(OwnedItems);
+//   const [level, setLevel] = useState(1);
+//   const [cost, setCost] = useState(price);
+//   const [locked, setLocked] = useState(false);
+//
+//   function upgrade() {
+//     if (bitcoins < cost) return;
+//     if (level >= maxLevel) {
+//       setLocked(true);
+//       return;
+//     }
+//     setBitcoins(bitcoins - cost);
+//     setLevel(level + 1);
+//     setCost(price * priceMultiplier * level);
+//     if (level >= maxLevel) setLocked(true);
+//
+//     let newOwnedItems = ownedItems;
+//     newOwnedItems.upgrades.push({ bps: bpsPerUpgrade });
+//     newOwnedItems.hasChange = true;
+//     setOwnedItems(newOwnedItems);
+//   }
+//
+//   function determineLocked() {
+//     if (locked === true) {
+//       return <p>Level: Max!</p>;
+//     } else {
+//       return (
+//         <>
+//           <p>Level: {level}</p>
+//           <p>Cost: {cost} btc</p>
+//         </>
+//       );
+//     }
+//   }
+//   return (
+//     <button class="upgrade" onClick={upgrade}>
+//       <p>{name}</p>
+//       {determineLocked()}
+//     </button>
+//   );
+// }
 
 export default App;

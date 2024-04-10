@@ -18,7 +18,7 @@ $tooltipBackground: rgb(62, 36, 66);
       width: 190px !important;
       height: 190px !important;
     }
-  } 
+  }
 }
 
 body {
@@ -31,7 +31,7 @@ body {
 }
 
 #root {
-  font-family: 'Merriweather', serif;
+  font-family: "Merriweather", serif;
   display: flex;
   width: 100%;
   justify-content: space-between;
@@ -89,6 +89,17 @@ div.mainContent {
     width: 390px;
     height: 390px;
   }
+  .clickingPower {
+    position: absolute;
+    width: fit-content;
+    margin-bottom: 2em;
+    padding: 4px 9px;
+    border-radius: 32px;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%);
+    background-color: rgba(255, 255, 255, 0.4);
+  }
 }
 
 aside.store {
@@ -108,18 +119,18 @@ aside.store {
     font-weight: 900;
   }
   button {
-    font-family: 'Merriweather', serif;
+    font-family: "Merriweather", serif;
     transition: all ease 0.5s;
     height: 100px;
     width: 100%;
     display: flex;
     flex-direction: column;
     border-radius: 15px;
-    border: 1px solid rgba($accent,.2);
+    border: 1px solid rgba($accent, 0.2);
     margin-top: 0;
     padding: 10px;
     margin-bottom: 8px;
-    background-color: rgba($accent,.08);
+    background-color: rgba($accent, 0.08);
     color: white;
     div.descriptors {
       display: flex;
@@ -147,8 +158,8 @@ aside.store {
     }
   }
   button:hover {
-    background-color: rgba($accent,.2);
-    border-color: rgba($accent,0);
+    background-color: rgba($accent, 0.2);
+    border-color: rgba($accent, 0);
   }
   div.systems {
     padding: 10px;
@@ -220,7 +231,7 @@ span.descriptor {
 
 .tooltip {
   pointer-events: none;
-  font-family: 'Merriweather', serif !important;
+  font-family: "Merriweather", serif !important;
   border-radius: 10px !important;
   background-color: $tooltipBackground !important;
   div.tooltipDescriptors {
