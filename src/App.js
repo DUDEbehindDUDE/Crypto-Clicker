@@ -162,16 +162,47 @@ function MainCounters({ total, bps }) {
     bps = Intl.NumberFormat("en", {}).format(bps);
   }
 
+  const bpsCounter = <p class="bitcoinPerSecond">per second: {bps}</p>;
+  const bpsCounterAddContent = [
+    "Bitcoin per second (BPS) represents how many Bitcoins you are passively" +
+    " earning each second.",
+    "BPS can be increased by purchasing systems and overclocks.",
+    "You can view the BPS of each system in the bottom right of each card in" +
+    " the systems panel."
+  ]
+
   return (
     <div class="textWrapper">
       <h1 class="totalBitcoin">Bitcoin: {total}</h1>
-      <p class="bitcoinPerSecond">per second: {bps}</p>
+      <DescriptionTooltip
+        element={bpsCounter}
+        title={"Bitcoin per Second"}
+        additionalContent={bpsCounterAddContent}
+        placement="bottom"
+      />
     </div>
   );
 }
 
+// Clicking Power Counter
 function SecondaryCounters({ bpc }) {
-  return <p class="clickingPower">Clicking Power: {bpc} bitcoin per click</p>;
+  const element = (
+    <p class="clickingPower">Clicking Power: {bpc} Bitcoin per click</p>
+  );
+  const addContent = [
+    "Clicking Power represents how much Bitcoin you earn from each click.",
+    "For example, if your clicking power was 2, you would earn 2 Bitcoin" +
+      " each time you manually clicked the Bitcoin.",
+    "To increase your clicking power, upgrade the RAM in your systems.",
+  ];
+
+  return (
+    <DescriptionTooltip
+      element={element}
+      title={"Clicking Power"}
+      additionalContent={addContent}
+    />
+  );
 }
 
 // Everything you can buy is part of this component
@@ -568,7 +599,7 @@ function Systems({
       : [];
 
     return (
-      <TooltipItem
+      <StoreItemTooltip
         key={system.name}
         element={button}
         mainItem={tooltip}
@@ -676,7 +707,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   return (
     <div class="systemUpgrades">
       <h3>Upgrades for {selected}</h3>
-      <TooltipItem
+      <StoreItemTooltip
         // GPU upgrade button
         element={
           <ItemButton
@@ -690,7 +721,6 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [],
           title: ownedItems.systems[selected].items.gpu.name,
           desc: ownedItems.systems[selected].items.gpu.desc,
         }}
@@ -700,10 +730,10 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
             "gpu"
           )} time(s), resulting in +${format(
             getLevel("gpu") * ownedItems.systems[selected].baseBps
-          )} bps (${getLevel("gpu")}x increase)`,
+          )} BPS (${getLevel("gpu")}x increase)`,
         ]}
       />
-      <TooltipItem
+      <StoreItemTooltip
         // CPU upgrade button
         element={
           <ItemButton
@@ -717,7 +747,6 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [],
           title: ownedItems.systems[selected].items.cpu.name,
           desc: ownedItems.systems[selected].items.cpu.desc,
         }}
@@ -732,7 +761,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
               }x production boost`,
         ]}
       />
-      <TooltipItem
+      <StoreItemTooltip
         // RAM upgrade button
         element={
           <ItemButton
@@ -746,7 +775,6 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           />
         }
         mainItem={{
-          descriptors: [],
           title: getLevel("ram") + " GB",
           desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
@@ -787,8 +815,47 @@ function ItemButton({
   );
 }
 
-// Renders a tooltip over the provided element when the element is hovered over
-function TooltipItem({ element, mainItem, additionalContent = [] }) {
+// Tooltips for descriptions
+function DescriptionTooltip({
+  element,
+  title,
+  additionalContent = [],
+  placement = "top",
+}) {
+  // add separator between additional content and title/desc
+  // if there is additional content
+  const separator =
+    additionalContent.length > 0 ? <div class="separator" /> : null;
+
+  const _additionalContent = additionalContent.map((item) => {
+    return <li key={`tooltipAddItem${title}${item}`}>{item}</li>;
+  });
+
+  const tooltipContent = (
+    <>
+      <div class="tooltipMainContent">
+        <p class="tooltipTitle">{title}</p>
+      </div>
+      {separator}
+      <ul class="addContent">{_additionalContent}</ul>
+    </>
+  );
+
+  return (
+    <Tippy
+      content={tooltipContent}
+      className="tooltip"
+      arrow={false}
+      animation={"shift-away"}
+      placement={placement}
+    >
+      {element}
+    </Tippy>
+  );
+}
+
+// Renders tooltips for store items
+function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
   /* Examples
    * mainItem = {
    *   descriptors: [
@@ -802,29 +869,44 @@ function TooltipItem({ element, mainItem, additionalContent = [] }) {
 
   // Format tooltip content
   const tooltip = () => {
-    const descriptors = mainItem.descriptors.map((descriptor) => (
-      <span
-        key={`tooltip${descriptor.text}${mainItem.title}`}
-        class={"descriptor " + descriptor.class}
-      >
-        {descriptor.text}
-      </span>
-    ));
-    const title = mainItem.title;
-    const desc = `"${mainItem.desc}"`;
+    // get descriptors if present
+    let descriptors = [];
+    if (mainItem.descriptors != undefined) {
+      descriptors = mainItem.descriptors.map((descriptor) => (
+        <span
+          key={`tooltip${descriptor.text}${mainItem.title}`}
+          class={"descriptor " + descriptor.class}
+        >
+          {descriptor.text}
+        </span>
+      ));
+    }
+
+    // if desc is undefined, don't render anything
+    const desc =
+      mainItem.desc === undefined ? (
+        ""
+      ) : (
+        <aside class="tooltipDesc">
+          <p class="desc">{mainItem.desc}</p>
+        </aside>
+      );
+
+    // add separator between additional content and title/desc
+    // if there is additional content
     const separator =
       additionalContent.length > 0 ? <div class="separator" /> : null;
+
     const _additionalContent = additionalContent.map((item) => {
       return <li key={`tooltipAddItem${mainItem.title}${item}`}>{item}</li>;
     });
+
     return (
       <>
         <div class="tooltipDescriptors">{descriptors}</div>
         <div class="tooltipMainContent">
-          <p class="tooltipTitle">{title}</p>
-          <aside class="tooltipDesc">
-            <p class="desc">{desc}</p>
-          </aside>
+          <p class="tooltipTitle">{mainItem.title}</p>
+          {desc}
         </div>
         {separator}
         <ul class="addContent">{_additionalContent}</ul>
