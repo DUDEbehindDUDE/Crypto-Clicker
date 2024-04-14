@@ -871,7 +871,7 @@ function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
   const tooltip = () => {
     // get descriptors if present
     let descriptors = [];
-    if (mainItem.descriptors != undefined) {
+    if (mainItem.descriptors !== undefined) {
       descriptors = mainItem.descriptors.map((descriptor) => (
         <span
           key={`tooltip${descriptor.text}${mainItem.title}`}
