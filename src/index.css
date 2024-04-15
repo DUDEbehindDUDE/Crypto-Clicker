@@ -50,8 +50,7 @@ div.mainContent {
 }
 div.mainContent .textWrapper {
   height: 100px;
-  width: -moz-fit-content;
-  width: fit-content;
+  width: 100%;
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -72,9 +71,7 @@ div.mainContent .bpsCounter p {
   margin-left: 0 !important;
 }
 div.mainContent .bpsCounter .material-symbols-outlined {
-  position: absolute;
-  left: 8.25em;
-  padding: 3px 1em;
+  padding: 3px 0.6em;
 }
 div.mainContent p {
   margin-top: 0;

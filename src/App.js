@@ -76,7 +76,7 @@ function App() {
   }
 
   // Calculates how many bitcoin should be earned each click each time
-  // ownedIte,s changes
+  // ownedItems changes
   function calculateBtcPerClick(systems) {
     let bpc = 0;
     for (const system in systems) {

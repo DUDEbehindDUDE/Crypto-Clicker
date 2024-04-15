@@ -23,11 +23,7 @@ $tooltipBackground: rgb(62, 36, 66);
 
 .material-symbols-outlined {
   font-size: 16px;
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 body {
@@ -62,7 +58,7 @@ div.mainContent {
   background-size: cover;
   .textWrapper {
     height: 100px;
-    width: fit-content;
+    width: 100%;
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -82,9 +78,7 @@ div.mainContent {
       margin-left: 0 !important;
     }
     .material-symbols-outlined {
-      position: absolute;
-      left: 8.25em;
-      padding: 3px 1em;
+      padding: 3px 0.6em;
     }
   }
   p {
@@ -120,7 +114,7 @@ div.mainContent {
     transform: translate(-50%);
     background-color: rgba(255, 255, 255, 0.4);
     .material-symbols-outlined {
-      padding-left: .6em;
+      padding-left: 0.6em;
       padding-top: 2px;
     }
   }
