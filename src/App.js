@@ -162,14 +162,19 @@ function MainCounters({ total, bps }) {
     bps = Intl.NumberFormat("en", {}).format(bps);
   }
 
-  const bpsCounter = <p class="bitcoinPerSecond">per second: {bps}</p>;
+  const bpsCounter = (
+    <div class="bpsCounter">
+      <p class="bitcoinPerSecond">per second: {bps}</p>
+      <span class="material-symbols-outlined">help</span>
+    </div>
+  );
   const bpsCounterAddContent = [
     "Bitcoin per second (BPS) represents how many Bitcoins you are passively" +
-    " earning each second.",
+      " earning each second.",
     "BPS can be increased by purchasing systems and overclocks.",
     "You can view the BPS of each system in the bottom right of each card in" +
-    " the systems panel."
-  ]
+      " the systems panel.",
+  ];
 
   return (
     <div class="textWrapper">
@@ -187,7 +192,10 @@ function MainCounters({ total, bps }) {
 // Clicking Power Counter
 function SecondaryCounters({ bpc }) {
   const element = (
-    <p class="clickingPower">Clicking Power: {bpc} Bitcoin per click</p>
+    <div class="clickingPower">
+      <p>Clicking Power: {bpc} Bitcoin per click</p>
+      <span class="material-symbols-outlined">help</span>
+    </div>
   );
   const addContent = [
     "Clicking Power represents how much Bitcoin you earn from each click.",

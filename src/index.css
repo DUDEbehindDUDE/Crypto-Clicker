@@ -13,6 +13,11 @@
     height: 190px !important;
   }
 }
+.material-symbols-outlined {
+  font-size: 16px;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -45,8 +50,12 @@ div.mainContent {
 }
 div.mainContent .textWrapper {
   height: 100px;
-  width: 100%;
+  width: -moz-fit-content;
+  width: fit-content;
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   top: 15%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -54,13 +63,20 @@ div.mainContent .textWrapper {
 div.mainContent h1 {
   font-weight: 900;
   font-size: 2.2em;
-  width: 100%;
   margin: 0;
-  text-align: center;
+}
+div.mainContent .bpsCounter {
+  display: flex;
+}
+div.mainContent .bpsCounter p {
+  margin-left: 0 !important;
+}
+div.mainContent .bpsCounter .material-symbols-outlined {
+  position: absolute;
+  left: 8.25em;
+  padding: 3px 1em;
 }
 div.mainContent p {
-  width: 100%;
-  text-align: center;
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -83,6 +99,7 @@ div.mainContent .bitcoin:active {
 }
 div.mainContent .clickingPower {
   position: absolute;
+  display: flex;
   width: -moz-fit-content;
   width: fit-content;
   margin-bottom: 2em;
@@ -92,6 +109,10 @@ div.mainContent .clickingPower {
   left: 50%;
   transform: translate(-50%);
   background-color: rgba(255, 255, 255, 0.4);
+}
+div.mainContent .clickingPower .material-symbols-outlined {
+  padding-left: 0.6em;
+  padding-top: 2px;
 }
 
 aside.store {
