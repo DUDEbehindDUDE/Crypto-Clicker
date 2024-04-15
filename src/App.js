@@ -725,7 +725,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           desc: ownedItems.systems[selected].items.gpu.desc,
         }}
         additionalContent={[
-          `Each overclock increases the BPS (bitcoin per second) produced by the system by ${ownedItems.systems[selected].baseBps} btc`,
+          `Each overclock increases the BPS (Bitcoin per second) produced by the system by ${ownedItems.systems[selected].baseBps} btc`,
           `Currently overclocked ${getLevel(
             "gpu"
           )} time(s), resulting in +${format(
@@ -779,12 +779,12 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
           desc: "It's random (haha get it because it stands for RANDOM Access Memory?!?)",
         }}
         additionalContent={[
-          "Each gigabyte of RAM increases the clicking power by 1 bitcoin per click",
+          "Each gigabyte of RAM increases the clicking power by 1 Bitcoin per click",
           getLevel("ram") === 1
             ? "Not yet upgraded, resulting in no additional clicking power"
             : `Currently at ${getLevel("ram")} GB, resulting in +${getLevel(
                 "ram"
-              )} bitcoin per click`,
+              )} Bitcoin per click`,
         ]}
       />
     </div>
