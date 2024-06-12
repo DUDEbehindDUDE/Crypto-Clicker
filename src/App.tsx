@@ -4,10 +4,11 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/shift-away.css";
 import bitcoinImg from "./media/bitcoin.png";
 import "./App.css";
+import React from "react";
 
-const Bitcoins = createContext(0);
-const Bps = createContext();
-const OwnedItems = createContext();
+const Bitcoins = createContext<any | number>(0);
+const Bps = createContext<any | number | null>(null);
+const OwnedItems = createContext<any | number | null>(null);
 
 /*
  * Note - this project was created in ReactJS, so all functions that start with uppercase letters
@@ -96,7 +97,7 @@ function App() {
     <Bitcoins.Provider value={{ bitcoins, setBitcoins }}>
       <Bps.Provider value={{ bps }}>
         <OwnedItems.Provider value={{ ownedItems, setOwnedItems }}>
-          <div class="mainContent">
+          <div className="mainContent">
             <MainCounters total={bitcoins} bps={bps} />
             <Bitcoin bitcoinPerClick={bitcoinPerClick} />
             <SecondaryCounters bpc={bitcoinPerClick} />
@@ -127,7 +128,7 @@ function Bitcoin({ bitcoinPerClick }) {
 
   return (
     <img
-      class="bitcoin"
+      className="bitcoin"
       alt="bitcoin"
       draggable="false"
       src={bitcoinImg}
@@ -163,9 +164,9 @@ function MainCounters({ total, bps }) {
   }
 
   const bpsCounter = (
-    <div class="bpsCounter">
-      <p class="bitcoinPerSecond">per second: {bps}</p>
-      <span class="material-symbols-outlined">help</span>
+    <div className="bpsCounter">
+      <p className="bitcoinPerSecond">per second: {bps}</p>
+      <span className="material-symbols-outlined">help</span>
     </div>
   );
   const bpsCounterAddContent = [
@@ -177,8 +178,8 @@ function MainCounters({ total, bps }) {
   ];
 
   return (
-    <div class="textWrapper">
-      <h1 class="totalBitcoin">Bitcoin: {total}</h1>
+    <div className="textWrapper">
+      <h1 className="totalBitcoin">Bitcoin: {total}</h1>
       <DescriptionTooltip
         element={bpsCounter}
         title={"Bitcoin per Second"}
@@ -192,9 +193,9 @@ function MainCounters({ total, bps }) {
 // Clicking Power Counter
 function SecondaryCounters({ bpc }) {
   const element = (
-    <div class="clickingPower">
+    <div className="clickingPower">
       <p>Clicking Power: {bpc} Bitcoin per click</p>
-      <span class="material-symbols-outlined">help</span>
+      <span className="material-symbols-outlined">help</span>
     </div>
   );
   const addContent = [
@@ -237,6 +238,10 @@ function Store() {
 
   // Buys an overclock if you can afford it
   function buyOverclock(item) {
+    if (selectedSystem === null) {
+      throw "Selected system can't be null!";
+    }
+
     // Check price
     const price = calcItemPrice(item, false, selectedSystem);
     if (price > bitcoins) return;
@@ -271,11 +276,19 @@ function Store() {
   }
 
   // Calculates the price of an item
-  function calcItemPrice(item, formatted = false, system = selectedSystem) {
+  function calcItemPrice(
+    item: string,
+    formatted = false,
+    system: number | null = selectedSystem
+  ) {
     let level;
     let priceModifier;
     let price;
 
+    if (system === null) {
+      throw "system can't be null!";
+    }
+    
     // Calculate the price of the item based on what the item is
     switch (item) {
       case "cpu":
@@ -343,7 +356,7 @@ function Store() {
   }
 
   return (
-    <aside class="store">
+    <aside className="store">
       <Systems
         setSelected={setSelectedSystem}
         buySystem={buySystem}
@@ -354,7 +367,6 @@ function Store() {
       <SystemUpgrades
         selected={selectedSystem}
         buyItem={buyOverclock}
-        ownedItems={ownedItems}
         calcItemPrice={calcItemPrice}
       />
     </aside>
@@ -507,7 +519,7 @@ function Systems({
   // Returns some system-specific descriptors based on the system's index
   const systemInfoDescriptors = (index, owned, isTooltip = false) => {
     const name = systems[index].name;
-    let descriptors = [];
+    let descriptors: any = [];
     if (!owned) {
       const price = systems[index].price;
       if (buyClass(price) === "incomeModifierPositive") {
@@ -580,11 +592,11 @@ function Systems({
           owned ? ( // the {" "} is literally just a space, if I don't have that there there is no space
             <>
               Producing{" "}
-              {<span class={""}>{format(calcSystemBps(system.name))}</span>} BPS
-              · Manage system {">"}
+              {<span className={""}>{format(calcSystemBps(system.name))}</span>}{" "}
+              BPS · Manage system {">"}
             </> // and the > is in brackets because otherwise, it thinks it's an HTML tag or whatever
           ) : (
-            <span class={buyClass(systems[index].price)}>
+            <span className={buyClass(systems[index].price)}>
               Purchase system for {format(systems[index].price)} btc
             </span>
           )
@@ -617,7 +629,7 @@ function Systems({
   });
 
   return (
-    <div class="systems">
+    <div className="systems">
       <h3>Systems</h3>
       {availableSystems}
     </div>
@@ -695,7 +707,7 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   const ownedText = (item) => {
     const itemText = item === "ram" ? "Upgrade" : "Overclock";
     return (
-      <span class={priceClass(item)}>
+      <span className={priceClass(item)}>
         Purchase {itemText} for {calcItemPrice(item, true)} btc
       </span>
     );
@@ -704,16 +716,16 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   // If no system has been selected yet, display placeholder/hint text
   if (selected === null) {
     return (
-      <div class="systemUpgrades">
+      <div className="systemUpgrades">
         <h3>Upgrades</h3>
-        <p class="noUpgrades">Buy and select a system to view upgrades!</p>
+        <p className="noUpgrades">Buy and select a system to view upgrades!</p>
       </div>
     );
   }
 
   // Display upgrades
   return (
-    <div class="systemUpgrades">
+    <div className="systemUpgrades">
       <h3>Upgrades for {selected}</h3>
       <StoreItemTooltip
         // GPU upgrade button
@@ -800,40 +812,52 @@ function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
 }
 
 // These are the buttons that you can click to buy/select systems/upgrades
+interface IItemButton {
+  object: any,
+  onClick: any,
+  ownedText: any,
+}
 function ItemButton({
   object,
   onClick,
   ownedText = undefined, // if supplied, renders the text underneath
-}) {
+}: IItemButton) {
   const descriptors = object.descriptors.map((descriptor, index) => (
     <span
       key={`${descriptor.text}${index}`}
-      class={"descriptor " + descriptor.class}
+      className={"descriptor " + descriptor.class}
     >
       {descriptor.text}
     </span>
   ));
   return (
     <button onClick={onClick}>
-      <div class="descriptors">{descriptors}</div>
-      <p class="buttonTitle">{object.title}</p>
-      <p class="buttonType">{object.type}</p>
-      <p class="manage">{ownedText}</p>
+      <div className="descriptors">{descriptors}</div>
+      <p className="buttonTitle">{object.title}</p>
+      <p className="buttonType">{object.type}</p>
+      <p className="manage">{ownedText}</p>
     </button>
   );
 }
 
 // Tooltips for descriptions
+interface IDescriptionTooltip {
+  element: React.JSX.Element,
+  title: string,
+  additionalContent: string[],
+  placement?: string,
+}
+
 function DescriptionTooltip({
   element,
   title,
   additionalContent = [],
   placement = "top",
-}) {
+}: IDescriptionTooltip) {
   // add separator between additional content and title/desc
   // if there is additional content
   const separator =
-    additionalContent.length > 0 ? <div class="separator" /> : null;
+    additionalContent.length > 0 ? <div className="separator" /> : null;
 
   const _additionalContent = additionalContent.map((item) => {
     return <li key={`tooltipAddItem${title}${item}`}>{item}</li>;
@@ -841,11 +865,11 @@ function DescriptionTooltip({
 
   const tooltipContent = (
     <>
-      <div class="tooltipMainContent">
-        <p class="tooltipTitle">{title}</p>
+      <div className="tooltipMainContent">
+        <p className="tooltipTitle">{title}</p>
       </div>
       {separator}
-      <ul class="addContent">{_additionalContent}</ul>
+      <ul className="addContent">{_additionalContent}</ul>
     </>
   );
 
@@ -855,7 +879,7 @@ function DescriptionTooltip({
       className="tooltip"
       arrow={false}
       animation={"shift-away"}
-      placement={placement}
+      placement={placement as any}
     >
       {element}
     </Tippy>
@@ -863,7 +887,12 @@ function DescriptionTooltip({
 }
 
 // Renders tooltips for store items
-function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
+interface IStoreItemTooltip {
+  element: React.JSX.Element,
+  mainItem: any,
+  additionalContent: string[],
+}
+function StoreItemTooltip({ element, mainItem, additionalContent = [] }:IStoreItemTooltip) {
   /* Examples
    * mainItem = {
    *   descriptors: [
@@ -883,7 +912,7 @@ function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
       descriptors = mainItem.descriptors.map((descriptor) => (
         <span
           key={`tooltip${descriptor.text}${mainItem.title}`}
-          class={"descriptor " + descriptor.class}
+          className={"descriptor " + descriptor.class}
         >
           {descriptor.text}
         </span>
@@ -895,15 +924,15 @@ function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
       mainItem.desc === undefined ? (
         ""
       ) : (
-        <aside class="tooltipDesc">
-          <p class="desc">{mainItem.desc}</p>
+        <aside className="tooltipDesc">
+          <p className="desc">{mainItem.desc}</p>
         </aside>
       );
 
     // add separator between additional content and title/desc
     // if there is additional content
     const separator =
-      additionalContent.length > 0 ? <div class="separator" /> : null;
+      additionalContent.length > 0 ? <div className="separator" /> : null;
 
     const _additionalContent = additionalContent.map((item) => {
       return <li key={`tooltipAddItem${mainItem.title}${item}`}>{item}</li>;
@@ -911,13 +940,13 @@ function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
 
     return (
       <>
-        <div class="tooltipDescriptors">{descriptors}</div>
-        <div class="tooltipMainContent">
-          <p class="tooltipTitle">{mainItem.title}</p>
+        <div className="tooltipDescriptors">{descriptors}</div>
+        <div className="tooltipMainContent">
+          <p className="tooltipTitle">{mainItem.title}</p>
           {desc}
         </div>
         {separator}
-        <ul class="addContent">{_additionalContent}</ul>
+        <ul className="addContent">{_additionalContent}</ul>
       </>
     );
   };
@@ -975,7 +1004,7 @@ function StoreItemTooltip({ element, mainItem, additionalContent = [] }) {
 //     }
 //   }
 //   return (
-//     <button class="upgrade" onClick={upgrade}>
+//     <button className="upgrade" onClick={upgrade}>
 //       <p>{name}</p>
 //       {determineLocked()}
 //     </button>
