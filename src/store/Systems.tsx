@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Bitcoins } from "../App.tsx";
 import ItemButton from "./ItemButton.tsx";
 import StoreItemTooltip from "../tooltip/StoreItemTooltip.tsx";
+import { format } from "../util/format.ts";
 
 // Systems (things u can buy)
 function Systems({
@@ -183,25 +184,6 @@ function Systems({
     }
     return descriptors;
   };
-
-  // Format numbers so they looks pretty ✨✨
-  function format(number) {
-    if (number >= 1_000_000) {
-      // for numbers bigger than 1 mil, format it like:
-      // 23.456 million (3 decimal places + word)
-      number = Intl.NumberFormat("en", {
-        notation: "compact",
-        compactDisplay: "long",
-        minimumFractionDigits: 3,
-      }).format(number);
-    } else {
-      // For numbers less than 1 mil, we can just format it with
-      // commas (12,345.67). "12.345 thousand" would be really stupid
-      number = Intl.NumberFormat("en", {}).format(number);
-    }
-
-    return number;
-  }
 
   // Renders all systems. Currently, all systems are by default available, but
   // they might become available based on price (like cookie clicker) later on

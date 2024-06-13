@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import Systems from "./Systems.tsx";
 import SystemUpgrades from "./SystemUpgrades.tsx";
 import { Bitcoins, OwnedItems } from "../App.tsx";
+import { format } from "../util/format.ts";
 
 // Everything you can buy is part of this component
 function Store() {
@@ -76,7 +77,7 @@ function Store() {
     if (system === null) {
       throw "system can't be null!";
     }
-    
+
     // Calculate the price of the item based on what the item is
     switch (item) {
       case "cpu":
@@ -104,23 +105,7 @@ function Store() {
     if (!formatted) {
       return price;
     }
-
-    // Format price so it looks pretty ✨✨
-    if (price >= 1_000_000) {
-      // for numbers bigger than 1 mil, format it like:
-      // 123.456 million (3 decimal places + word)
-      price = Intl.NumberFormat("en", {
-        notation: "compact",
-        compactDisplay: "long",
-        minimumFractionDigits: 3,
-      }).format(price);
-    } else {
-      // For numbers less than 1 mil, we can just format it with
-      // commas (12,345.67). "12.345 thousand" would be really stupid
-      price = Intl.NumberFormat("en", {}).format(price);
-    }
-
-    return price;
+    return format(price);
   }
 
   // Checks if a system has upgrades available

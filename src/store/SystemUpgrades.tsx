@@ -3,30 +3,12 @@ import { Bitcoins, OwnedItems } from "../App.tsx";
 import React from "react";
 import ItemButton from "./ItemButton.tsx";
 import StoreItemTooltip from "../tooltip/StoreItemTooltip.tsx";
+import { format } from "../util/format.ts";
 
 // Renders overclocks/upgrades for the selected system
 function SystemUpgrades({ selected, buyItem, calcItemPrice }) {
   const { ownedItems } = useContext(OwnedItems);
   const { bitcoins } = useContext(Bitcoins);
-
-  function format(number) {
-    // TODO -- figure out how global functions work in react so I don't have to copy paste this in every prop I use it in
-    if (number >= 1_000_000) {
-      // for numbers bigger than 1 mil, format it like:
-      // 23.456 million (3 decimal places + word)
-      number = Intl.NumberFormat("en", {
-        notation: "compact",
-        compactDisplay: "long",
-        minimumFractionDigits: 3,
-      }).format(number);
-    } else {
-      // For numbers less than 1 mil, we can just format it with
-      // commas (12,345.67). "12.345 thousand" would be really stupid
-      number = Intl.NumberFormat("en", {}).format(number);
-    }
-
-    return number;
-  }
 
   const priceClass = (item) =>
     bitcoins >= calcItemPrice(item)

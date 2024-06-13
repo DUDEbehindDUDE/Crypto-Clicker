@@ -1,31 +1,14 @@
 import React from "react";
 import DescriptionTooltip from "../tooltip/DescriptionTooltip.tsx";
+import { format } from "../util/format.ts";
 
 // Bitcoin and bps counter
 function MainCounters({ total, bps }) {
   // Format total bitcoins counter
-  total = Math.floor(total);
-  if (total >= 1_000_000) {
-    total = Intl.NumberFormat("en", {
-      notation: "compact",
-      compactDisplay: "long",
-      minimumFractionDigits: 3,
-    }).format(total);
-  } else {
-    total = Intl.NumberFormat("en", {}).format(total);
-  }
+  total = format(total, true, false);
 
   // Format bps counter
-  bps = Math.round(bps * 10) / 10;
-  if (bps >= 1_000_000) {
-    bps = Intl.NumberFormat("en", {
-      notation: "compact",
-      compactDisplay: "long",
-      minimumFractionDigits: 3,
-    }).format(bps);
-  } else {
-    bps = Intl.NumberFormat("en", {}).format(bps);
-  }
+  bps = format(bps);
 
   const bpsCounter = (
     <div className="bpsCounter">
