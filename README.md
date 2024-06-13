@@ -1,5 +1,34 @@
 # Crypto Clicker
 
-A project that was initially made for the 2023 Create PT Task
+Crypto clicker is an idle game/clicker where you click a Bitcoin, and use the Bitcoins you get from that to purchase and upgrade more systems to earn you more Bitcoin.
 
-Disclaimer: Currently, the code is quite bad, and everything is in a single file because of the requirements for the AP Create PT task. I plan on refactoring the code and converting it to typescript at some point, that point just hasn't come yet.
+## Run/Build project
+
+To run Crypto Clicker locally, follow these steps:
+
+Clone the repository:
+
+```sh
+git clone https://github.com/your-username/crypto-clicker.git
+cd crypto-clicker
+```
+
+Install dependencies:
+
+```sh
+yarn install
+```
+
+Start the development server:
+
+```sh
+yarn start
+```
+
+Or alternatively, build the project:
+
+```sh
+yarn build
+```
+
+This project was initially made for the 2023/24 Create PT Task, and commit e5c4c4be38c90bb56ba506d81fdf53ffd8a62db2 was what I actually submitted.
