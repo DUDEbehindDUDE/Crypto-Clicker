@@ -102,6 +102,18 @@ div.mainContent {
     width: 390px;
     height: 390px;
   }
+  .autosaveIndicator {
+    position: absolute;
+    display: flex;
+    bottom: 0;
+    margin: 1.5em;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 0.5em;
+    border-radius: 2em;
+    .material-symbols-outlined {
+      font-size: 2em;
+    }
+  }
   .clickingPower {
     position: absolute;
     display: flex;

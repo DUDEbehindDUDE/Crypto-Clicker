@@ -4,10 +4,11 @@ import "tippy.js/animations/shift-away.css";
 import "./App.css";
 import Cookies from "js-cookie";
 import React from "react";
-import MainCounters from "./counters/MainCounters.tsx";
-import Bitcoin from "./bitcoin/Bitcoin.tsx";
+import MainCounters from "./bitcoinArea/MainCounters.tsx";
+import Bitcoin from "./bitcoinArea/Bitcoin.tsx";
 import Store from "./store/Store.tsx";
-import SecondaryCounters from "./counters/SecondaryCounters.tsx";
+import SecondaryCounters from "./bitcoinArea/SecondaryCounters.tsx";
+import AutosaveIndicator from "./bitcoinArea/AutosaveIndicator.tsx";
 
 export const Bitcoins = createContext<any | number>(0);
 export const Bps = createContext<any | number | null>(null);
@@ -24,6 +25,7 @@ function App() {
     systems: {},
     upgrades: [],
   });
+  const [prevSaveTime, setPrevSaveTime] = useState(new Date());
 
   // UseRefs to keep track of autosave data
   const hasLoadedRef = useRef(false);
@@ -93,6 +95,7 @@ function App() {
     console.log("Autosave");
     console.log(Cookies.get("bitcoins"));
     console.log(JSON.parse(Cookies.get("ownedItems")));
+    setPrevSaveTime(new Date());
   }
 
   useEffect(() => {
@@ -159,6 +162,7 @@ function App() {
           <div className="mainContent">
             <MainCounters total={bitcoins} bps={bps} />
             <Bitcoin bitcoinPerClick={bitcoinPerClick} />
+            <AutosaveIndicator prevSave={prevSaveTime} onClick={doAutosave} />
             <SecondaryCounters bpc={bitcoinPerClick} />
           </div>
           <Store />
