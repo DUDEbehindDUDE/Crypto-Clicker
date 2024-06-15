@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import DescriptionTooltip from "../tooltip/DescriptionTooltip.tsx";
-import { IAutosaveIndicator } from "../types/interface/IAutosaveIndicator";
+import { IAutosaveIndicator } from "../types/interface/IAutosaveIndicator.ts";
 import React from "react";
 
 function AutosaveIndicator({ prevSave, onClick }: IAutosaveIndicator) {

@@ -4,11 +4,11 @@ import "tippy.js/animations/shift-away.css";
 import "./App.css";
 import Cookies from "js-cookie";
 import React from "react";
-import MainCounters from "./bitcoinArea/MainCounters.tsx";
-import Bitcoin from "./bitcoinArea/Bitcoin.tsx";
+import MainCounters from "./mainContent/MainCounters.tsx";
+import Bitcoin from "./mainContent/Bitcoin.tsx";
 import Store from "./store/Store.tsx";
-import SecondaryCounters from "./bitcoinArea/SecondaryCounters.tsx";
-import AutosaveIndicator from "./bitcoinArea/AutosaveIndicator.tsx";
+import SecondaryCounters from "./mainContent/SecondaryCounters.tsx";
+import AutosaveIndicator from "./mainContent/AutosaveIndicator.tsx";
 
 export const Bitcoins = createContext<any | number>(0);
 export const Bps = createContext<any | number | null>(null);
