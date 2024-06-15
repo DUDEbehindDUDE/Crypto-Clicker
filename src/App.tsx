@@ -31,6 +31,9 @@ function App() {
   const hasLoadedRef = useRef(false);
   const bitcoinsRef = useRef(bitcoins);
   const ownedItemsRef = useRef(ownedItems);
+  
+  // UseRef to keep track of bps
+  const lastBitcoinUpdate = useRef(new Date());
 
   // Load autosave data
   useEffect(() => {
@@ -68,17 +71,12 @@ function App() {
     bitcoinsRef.current = bitcoins;
   }, [bitcoins]);
 
-  // Add 1/10th of the bps to total bitcoin every 100ms
+  // Add bitcoins based on bps
   useEffect(() => {
-    const bpsInterval = setInterval(handleBps, 100);
-    return () => {
-      clearInterval(bpsInterval);
-    };
-
-    function handleBps() {
-      setBitcoins((bitcoins) => bitcoins + bps / 10);
-    }
-  }, [bps]);
+    const difference = (Date.now() - lastBitcoinUpdate.current.valueOf()) / 1000;
+    setBitcoins((bitcoins) => bitcoins + bps * difference);
+    lastBitcoinUpdate.current = new Date();
+  }, [bps, bitcoins]);
 
   // Autosave items to cookies every 15 secs
   function doAutosave() {
